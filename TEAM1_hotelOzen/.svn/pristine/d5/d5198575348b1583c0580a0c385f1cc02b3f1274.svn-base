@@ -1,0 +1,210 @@
+@charset "UTF-8";
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mypage-side{
+	background: #f9f9f9;
+	padding: 52px 35px 44px;
+}
+
+.mypage-side .name {
+    margin-bottom: 21px;
+    font: 500 32px/1 notokrR;
+    letter-spacing: -.025em;
+}
+
+.mypage-side .info a {
+    display: block;
+    margin-bottom: 3px;
+    letter-spacing: -.01em;
+}
+
+.mypage-side .info a .tit {
+    display: inline-block;
+    width: 72px;
+    color: #000;
+    font: 400 18px/1.5 gothamL,notokrL;
+}
+
+.mypage-side .info a .txt {
+    position: relative;
+    color: #989442;
+    font: 500 18px/1.5 gothamM,notokrR;
+    word-break: break-all;
+}
+
+.mypage-side .lnb li {
+    font: 500 22px/1 notokrR;
+    letter-spacing: -.025em;
+}
+
+.mypage-side .lnb li > ul {
+    margin: 16px 0 37px;
+    padding-inline-start:0px;
+}
+
+.mypage-side .lnb li > ul li a {
+    font: 400 18px/38px gothamL, notokrL;
+    letter-spacing: -.01em;
+}
+
+.mypage-contain{
+	align-items: flex-start;	
+}
+
+.myAccountBox {
+    border: 1px solid #000;
+}
+
+.myAccountInfo {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    padding: 33px 0 34px;
+}
+
+.myAccountInfo dl {
+    display: table-cell;
+    vertical-align: top;
+    padding: 0 39px 0 37px;
+}
+
+.myAccountInfo dl + dl {
+    border-left: 1px solid #ccc;
+}
+
+.myAccountInfo dt {
+    padding-bottom: 17px;
+    font: 500 16px notokrR;
+    letter-spacing: -.025em;
+    position: relative;
+}
+
+.myAccountInfo dd {
+    position: relative;
+    display: block;
+    padding-left: 1px;
+    overflow: hidden;
+}
+
+.myAccountInfo dd .txtGuide {
+    position: absolute;
+    top: 16px;
+    right: 0;
+}
+
+.btnLine {
+    display: inline-block;
+    line-height: 1.25;
+    font-size: 14px;
+    letter-spacing: -.01em;
+    box-sizing: border-box;
+    border: none;
+    background: none;
+}
+
+.btnLine:after, .btnMore:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: #000;
+}
+
+.myAccountBox .side {
+    position: absolute;
+    right: 0;
+    background: none;
+}
+
+.myAccountInfo dd span {
+    position: relative;
+    font: 500 36px playfair, JungChul !important;
+    letter-spacing: .05em;
+    font-feature-settings: 'lnum','pnum';
+}
+.btnArr {
+    position: relative;
+    padding-right: 16px;
+    font-size: 16px;
+    font-family: JungChul !important;
+    letter-spacing: -.025em;
+}
+
+.btnArr:after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 14px;
+    margin-top: 1px;
+}
+
+.myCouponBox {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    padding: 49px 0 39px;
+    border-bottom: 1px solid #ccc;
+}
+
+.myCouponBox dl {
+    display: table-cell;
+    vertical-align: top;
+    padding: 0 40px;
+    text-align: center;
+}
+
+.myCouponBox dt {
+    padding-bottom: 6px;
+    font: 400 16px/1 JungChul !important;
+}
+
+.myCouponBox dd {
+    font: 600 35px JungChul !important;
+}
+
+.myCouponBox dd em {
+    font: 500 36px playfair, JungChul !important;
+    font-feature-settings: 'lnum','pnum';
+}
+
+.myCouponBox dl + dl {
+    border-left: 1px solid #ccc;
+}
+
+.membershipCashList {
+    border-top: 1px solid #000;
+}
+
+.membershipCashList .noData {
+    margin: -1px 0;
+    background: #fff;
+}
+
+.noData {
+    text-align: center;
+    padding: 130px 0 !important;
+    width: 100% !important;
+    font-size: 16px;
+}
+
+.noData .txt:before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 45px;
+    margin: 0 auto 30px;
+    background: url(../../../assets/img/ExclamationMark.png)
+}
+
+.mypage-detail-title {
+    font: 500 30px gothamB, notokrR;
+}

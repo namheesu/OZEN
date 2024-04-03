@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+/* table에 클래스 부여 */
+.center {
+	text-align: center;
+}
+
+/* th에 적용합니다 */
+.wdf {
+	
+}
+
+/* thead에 적용합니다 */
+.bg-oran {
+	border-top: 2px solid #000000;
+	border-bottom: 1px solid #000000;
+}
+
+.table{
+	border-color:#a1a1a1;
+}
+
+.form-check-input[type=checkbox]{
+	border-color:#777777;
+}
+
+.bg-oran > tr > th:first-child{
+	width : 70px;
+}

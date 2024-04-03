@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpParkingMapper">
+
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR PKG_CAR_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+	    </trim>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+			TB_PARKING
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectList" resultType="ParkingVO" parameterType="PaginationInfo">
+		WITH RNUMFXTRS AS (
+			SELECT 
+				ROWNUM RNUM, A.*    
+		    FROM (
+				SELECT 
+				    PKG_CAR_NO
+				    , PKG_ENTVHCL_TIME
+				    , PKG_LVVHCL_TIME
+				    , PKG_STAY_YN
+				    , PKG_AMNT
+				FROM 
+				    TB_PARKING
+				<include refid="searchFrag" />  
+				ORDER BY PKG_ENTVHCL_TIME DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMFXTRS
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+</mapper>

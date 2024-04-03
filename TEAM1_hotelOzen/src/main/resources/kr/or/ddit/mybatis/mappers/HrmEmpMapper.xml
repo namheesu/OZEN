@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.HrmEmpMapper">
+
+
+<select id="selectNewEmpNo" resultType="string">
+	SELECT 
+    	NVL2(MAX(EMP_NO),'E'||TO_CHAR(SYSDATE,'YY')||LPAD(SUBSTR(MAX(EMP_NO),-4)+1, 4, 0), 'E'||TO_CHAR(SYSDATE,'YY')||'0001')
+	FROM TB_EMP
+	WHERE EMP_NO LIKE 'E'||TO_CHAR(SYSDATE,'YY')||'%'
+</select>
+
+
+<insert id="insert" parameterType="HrmEmpVO">
+	INSERT INTO TB_EMP (
+	    EMP_NO
+	    , EMP_NM
+	    , EMP_TEL
+	    , EMP_HOME_TEL
+	    , EMP_EML
+	    , EMP_ADDR
+	    , EMP_JNCMP_YMD
+	    , EMP_RTRM_YN
+	    , EMP_PROFL_NM
+	    , EMP_PROFL_UUID
+	    , EMP_ANNUAL_LEAVE
+	    , EMP_JBGD
+	    , EMP_DEPT
+	    , EMP_BIRTH
+	    , EMP_PW
+	    , USER_ROLE
+	) VALUES (
+		 #{empNo,jdbcType=VARCHAR}
+		, #{empNm,jdbcType=VARCHAR}
+		, #{empTel,jdbcType=VARCHAR}
+		, #{empHomeTel,jdbcType=VARCHAR}
+		, #{empEml,jdbcType=VARCHAR}
+		, #{empAddr,jdbcType=VARCHAR}
+		, TO_DATE(TO_CHAR(#{empJncmpYmd,jdbcType=DATE},'YYYY/MM/DD'),'YYYY/MM/DD')
+		, #{empRtrmYn,jdbcType=CHAR}
+		, #{empProflNm,jdbcType=VARCHAR}
+		, #{empProflUuid,jdbcType=VARCHAR}
+		, 0
+		, #{empJbgd,jdbcType=VARCHAR}
+		, #{empDept,jdbcType=CHAR}
+		, TO_DATE(TO_CHAR(#{empBirth,jdbcType=DATE},'YYYY/MM/DD'),'YYYY/MM/DD')
+		, #{empPw,jdbcType=VARCHAR}
+		, 'ROLE_EMP'
+	)
+</insert>
+
+<select id="selectList" resultType="HrmEmpVO">
+	SELECT A.*, ROWNUM RNUM
+	FROM
+		(SELECT
+		    EMP_NO
+		  , EMP_NM
+		  , EMP_TEL
+		  , EMP_HOME_TEL
+		  , EMP_EML
+		  , EMP_ADDR
+		  , EMP_JNCMP_YMD
+		  , EMP_RTRM_YN
+		  , EMP_PROFL_NM
+		  , EMP_PROFL_UUID
+		  , EMP_ANNUAL_LEAVE
+		  , DECODE(EMP_JBGD, 'STF', '사원', 'DPM', '팀장') AS EMP_JBGD
+		  , DECODE(EMP_JBGD, 'DPM', '1', 'STF', '2') AS EMP_JBGD_NO
+		  , CASE WHEN TB_EMP.EMP_DEPT ='FTO' THEN '프론트오피스부'
+	        WHEN TB_EMP.EMP_DEPT ='HKP' THEN '하우스키핑부'
+	        WHEN TB_EMP.EMP_DEPT ='FMT' THEN '시설관리부'
+	        WHEN TB_EMP.EMP_DEPT ='CRM' THEN '고객관리부'
+	        WHEN TB_EMP.EMP_DEPT ='POS' THEN '재무부'
+	        WHEN TB_EMP.EMP_DEPT ='HRM' THEN '인사부'
+	        ELSE '부서미배정'
+	        END AS EMP_DEPT
+	      , DECODE(EMP_DEPT
+	      				, 'FTO', '1'
+	      				, 'HKP', '2'
+	      				, 'FMT', '3'
+	      				, 'CRM', '4'
+	      				, 'POS', '5'
+	      				, 'HRM', '6') AS EMP_DEPT_NO
+		  , EMP_BIRTH
+		  , EMP_PW
+		  , USER_ROLE
+		FROM
+	    	TB_EMP
+<!-- 	    WHERE EMP_RTRM_YN IS NULL -->
+	    ORDER BY EMP_DEPT_NO, EMP_JBGD_NO
+	    ) A
+</select>
+
+
+
+
+
+<resultMap type="HrmEmpVO" id="hrmEmpDclzMap" autoMapping="true">
+	<id property="empNo" column="EMP_NO"/>
+	<association property="dclz" javaType="DclzVO" autoMapping="true">
+		<id property="dclzNo" column="DCLZ_NO"/>
+	</association>
+</resultMap>
+<select id="selectDclzList" resultMap="hrmEmpDclzMap">
+	SELECT
+	    EMP_NO
+	  , EMP_NM
+	  , EMP_TEL
+	  , EMP_HOME_TEL
+	  , EMP_EML
+	  , EMP_ADDR
+	  , EMP_JNCMP_YMD
+	  , EMP_RTRM_YN
+	  , EMP_PROFL_NM
+	  , EMP_PROFL_UUID
+	  , EMP_ANNUAL_LEAVE
+	  , DECODE(EMP_JBGD, 'STF', '사원', 'DPM', '팀장') AS EMP_JBGD
+	  , EMP_DEPT
+	  , EMP_BIRTH
+	  , EMP_PW
+	  , USER_ROLE
+	  , DCLZ_NO
+	  , WORK_TYPE_CD
+	  , DCLZ_BGN_DT
+	  , DCLZ_END_DT
+	FROM
+	    TB_DCLZ LEFT OUTER JOIN TB_EMP USING (EMP_NO)
+	WHERE 
+<!-- 	(TO_CHAR(DCLZ_YMD, 'yyyy/mm/dd') = TO_CHAR(SYSDATE, 'yyyy/mm/dd') AND DCLZ_STTS='O') -->
+<!-- 			OR  -->
+			TO_CHAR(DCLZ_YMD,'YYYY/MM/DD')  = TO_CHAR(SYSDATE,'YYYY/MM/DD') AND DCLZ_BGN_DT IS NOT NULL AND DCLZ_STTS='O'
+</select>
+
+<select id="selectRtrmList" resultType="HrmEmpVO">
+	SELECT
+	    EMP_NO
+	  , EMP_NM
+	  , EMP_TEL
+	  , EMP_HOME_TEL
+	  , EMP_EML
+	  , EMP_ADDR
+	  , EMP_JNCMP_YMD
+	  , EMP_RTRM_YN
+	  , EMP_PROFL_NM
+	  , EMP_PROFL_UUID
+	  , EMP_ANNUAL_LEAVE
+	  , DECODE(EMP_JBGD, 'STF', '사원', 'DPM', '팀장') AS EMP_JBGD
+	  , EMP_DEPT
+	  , EMP_BIRTH
+	  , EMP_PW
+	  , USER_ROLE
+	FROM
+	   TB_EMP 
+	WHERE EMP_RTRM_YN = 'Y'
+</select>
+
+
+<select id="select" parameterType="string" resultType="HrmEmpVO">
+	SELECT
+	    EMP_NO
+	  , EMP_NM
+	  , EMP_TEL
+	  , EMP_HOME_TEL
+	  , EMP_EML
+	  , EMP_ADDR
+	  , EMP_JNCMP_YMD
+	  , EMP_RTRM_YN
+	  , EMP_PROFL_NM
+	  , EMP_PROFL_UUID
+	  , EMP_ANNUAL_LEAVE
+	  , DECODE(EMP_JBGD, 'STF', '사원', 'DPM', '팀장') AS EMP_JBGD
+	  , EMP_DEPT
+	  , EMP_BIRTH
+	  , EMP_PW
+	  , USER_ROLE
+	FROM
+	   TB_EMP 
+	WHERE EMP_NO = #{empNo,jdbcType=VARCHAR}
+
+</select>
+
+<!-- 직원정보수정은 직원 정보 개인 페이지에서.. 따라서 사용하지 않는 쿼리문 -->
+<update id="update">
+	UPDATE TB_EMP
+	SET
+	    #{empTel,jdbcType=VARCHAR}
+	    , #{empHomeTel,jdbcType=VARCHAR}
+	    , #{empEml,jdbcType=VARCHAR}
+	    , #{empAddr,jdbcType=VARCHAR}
+	    , #{empProflNm,jdbcType=VARCHAR}
+	    , #{empProflUuid,jdbcType=VARCHAR}
+	    , #{empPw,jdbcType=VARCHAR}
+	WHERE
+	    EMP_NO = #{empNo,jdbcType=VARCHAR}
+</update>
+<!-- 직원정보수정은 직원 정보 개인 페이지에서.. 따라서 사용하지 않는 쿼리문 -->
+
+<delete id="delete" parameterType="string">
+	UPDATE TB_EMP
+	SET 
+	EMP_RTRM_YN = 'Y'
+	WHERE EMP_NO = #{empNo,jdbcType=VARCHAR}
+</delete>
+
+
+</mapper>

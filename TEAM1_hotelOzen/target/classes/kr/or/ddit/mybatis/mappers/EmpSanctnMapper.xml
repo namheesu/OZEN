@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpSanctnMapper">
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR FX_CD LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR PRCHS_FX_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND PRCHS_SE = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+		</trim>
+	</sql>
+	
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			TB_FXTRS_PRCHS_STTST
+		<include refid="searchFrag"/>
+	</select>
+	<select id="selectList" parameterType="PaginationInfo">
+		WITH RNUMFXTRS AS (
+			SELECT
+				ROWNUM RNUM
+				, FXTRS.*
+			FROM(
+				SELECT
+					EMP_NO
+					, FX_CD
+					, PRCHS_FX_NM
+					, PRCHS_FX_CNT
+					, PRCHS_AMNT
+					, PRCHS_YMD
+					, PRCHS_SE
+					, RQST_NO
+				FROM
+					TB_FXTRS_PRCHS_STTST
+				<include refid="searchFrag" />
+				GROUP BY
+					EMP_NO
+					, FX_CD
+					, PRCHS_FX_NM
+					, PRCHS_FX_CNT
+					, PRCHS_AMNT
+					, PRCHS_YMD
+					, PRCHS_SE
+					, RQST_NO
+				ORDER BY RQST_NO DESC
+			)FXTRS
+		)
+		SELECT 
+			RNUM
+			, EMP_NO
+			, FX_CD
+			, PRCHS_FX_NM
+			, PRCHS_FX_CNT
+			, PRCHS_AMNT
+			, PRCHS_YMD
+			, PRCHS_SE
+			, RQST_NO
+		FROM RNUMFXTRS
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+		
+	</select>
+	
+	<insert id="insertFxtrsPrchsSttst" parameterType="FxtrsPrchsSttstVO">
+	INSERT ALL
+		<foreach collection="list" item="fxtrs">
+		INTO TB_FXTRS_PRCHS_STTST(
+		FX_CD
+		, EMP_NO
+		, PRCHS_FX_NM
+		, PRCHS_FX_CNT
+		, PRCHS_AMNT
+		, PRCHS_YMD
+		, PRCHS_SE
+		, RQST_NO
+	)VALUES(
+		 #{fxtrs.fxCd,jdbcType=VARCHAR}
+		, #{fxtrs.empNo,jdbcType=VARCHAR}
+		, #{fxtrs.prchsFxNm,jdbcType=VARCHAR}
+		, #{fxtrs.prchsFxCnt,jdbcType=NUMERIC}
+		, #{fxtrs.prchsAmnt,jdbcType=NUMERIC}
+		, SYSDATE
+		, 'Y'
+		, #{fxtrs.rqstNo,jdbcType=VARCHAR}
+	)
+	</foreach>
+	SELECT * 
+		FROM DUAL
+</insert>
+
+<update id="updateFxtrsCnt" parameterType="FxtrsVO">
+	UPDATE 
+		TB_FXTRS
+	SET
+		FX_PRES_CNT = #{fxPresCnt}
+	WHERE
+		FX_CD = #{fxCd}
+</update>
+<select id="selectFxtrsCnt">
+	SELECT
+		FX_PRES_CNT
+	FROM 
+		TB_FXTRS
+	WHERE
+		FX_CD = #{fxCd}
+</select>
+</mapper>

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpStayChkinMapper">
+
+	<sql id="searchFrag">
+		AND
+		<trim prefix="(" suffix=")" prefixOverrides="OR">
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR CST_NM LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR RSVT_NO LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+        </trim>
+	</sql>
+	
+	<sql id="chkinList">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		<![CDATA[
+			WHERE RSVT_SE = '예약중' AND TRUNC(RSVT_CHECKIN_YMD) <= TRUNC(SYSDATE)
+		]]>
+			<include refid="searchFrag" />
+        </if>
+		<if test="!@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		<![CDATA[
+	    	WHERE RSVT_SE = '예약중' AND TRUNC(RSVT_CHECKIN_YMD) <= TRUNC(SYSDATE)
+    	]]>
+	    </if>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_RSVT
+		    INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
+		    INNER JOIN TB_CSTMR USING(CST_NO)
+		<include refid="chkinList" />
+	</select>
+
+	<resultMap type="RsvtVO" id="chkinMap" autoMapping="true">
+	    <id property="rsvtNo" column="RSVT_NO"/>
+	    <association property="cstmr" javaType="CstmrVO" autoMapping="true">
+	        <id property="cstNo" column="CST_NO"/>
+	    </association>
+	    <collection property="rsvtDetails" javaType="list" ofType="RsvtDetailsVO" autoMapping="true">
+	        <id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        <association property="roomTypeVO" javaType="RoomTypeVO">
+	        	<id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        	<result property="rmtNmDetails" column="RMT_NM_DETAILS"/>
+	        </association>
+	    </collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="chkinMap" parameterType="PaginationInfo">
+		WITH RNUMRSVT AS (
+		    SELECT 
+		        ROWNUM RNUM, A.*    
+		    FROM (
+		        SELECT 
+		            RSVT_DTL_NO
+		            , CST_NM
+		            , RSVT_YMD
+		            , RSVT_CHECKIN_YMD
+		            , RMT_TYPE_CD
+		            , RMT_NM_DETAILS
+		            , RSVT_ROOM_CNT
+		            , RSVT_ADULT_CNT
+		            , RSVT_CHILD_CNT
+		            , RSVT_SE
+		            , CST_NO
+		            , RSVT_AMNT
+		            , RSVT_CNCL_YN
+		            , RSVT_SETLE_NO
+		        FROM 
+		            TB_RSVT
+		            INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
+		            INNER JOIN TB_CSTMR USING(CST_NO)
+		            INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
+		        <include refid="chkinList" />
+		        ORDER BY RSVT_DTL_NO DESC
+		    )A
+		)
+		SELECT *
+		FROM RNUMRSVT
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	
+	<resultMap type="RsvtDetailsVO" id="rsvtDtlMap" autoMapping="true">
+		<id property="rsvtDtlNo" column="RSVT_DTL_NO"/>
+		<association property="rsvt" javaType="RsvtVO" autoMapping="true">
+			<id property="rsvtNo" column="RSVT_NO"/>
+			<association property="cstmr" javaType="CstmrVO" autoMapping="true">
+				<id property="cstNo" column="CST_NO"/>			
+			</association>
+		</association>
+	</resultMap>
+	
+	<select id="select" resultMap="rsvtDtlMap" parameterType="String">
+		SELECT
+		    RSVT_DTL_NO
+		    , RSVT_NO
+		    , CST_NO
+		    , CST_NM
+		    , CST_HP
+		    , CST_BIRTH
+		    , RSVT_YMD
+		    , RSVT_CHECKIN_YMD
+		    , RSVT_CHECKOUT_YMD
+		    , RSVT_DTL_NMPR_CNT
+		    , RSVT_DTL_ADULT_CNT
+		    , RSVT_DTL_CHILD_CNT
+		    , RSVT_DTL_AMNT
+		    , RMT_TYPE_CD
+		    , RSVT_SE
+		    , RSVT_AMNT
+		FROM
+		    TB_RSVT_DETAILS
+		    INNER JOIN TB_RSVT USING (RSVT_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		WHERE
+		    RSVT_DTL_NO = #{rsvtDtlNo}
+	</select>
+	
+	<select id="selectCarNo" parameterType="String" resultType="String">
+		SELECT 
+			CAR_NO
+		FROM 
+			TB_CAR
+		WHERE 
+			CAR_NM = #{carNm}
+		GROUP BY 
+			CAR_NO
+
+	</select>
+	
+	<select id="selectChkinNo" resultType="String">
+		SELECT 
+		    'CI' || TO_CHAR(SYSDATE, 'YYMM') || LPAD(COALESCE(MAX(TO_NUMBER(SUBSTR(CHKIN_NO, 7))), 0) + 1, 4, '0') AS CHKIN_NO
+		FROM 
+		    TB_CHKIN
+		WHERE 
+		    SUBSTR(CHKIN_NO, 3, 2) = TO_CHAR(SYSDATE, 'YY') 
+		    AND SUBSTR(CHKIN_NO, 5, 2) = TO_CHAR(SYSDATE, 'MM')
+	</select>
+	
+	<insert id="insertChkin" parameterType="Map">
+		INSERT INTO TB_CHKIN (
+		    CHKIN_NO
+		    , RM_NO
+		    , CST_NO
+		    , CI_DT
+		    , CI_CAR_NO
+		    , CI_COWILL_YMD
+		    , CI_TOTAL_NMPR
+		    , CI_ADULT_CNT
+		    , CI_CHILD_CNT
+		    , CI_SETLE_NO
+		    , CI_CAR_KIND
+		    , CI_SETLE_YN
+		    , CI_SE_CD
+		    , RSVT_DTL_NO
+		) VALUES (
+		    #{chkinNo}
+		  , #{rmNo}
+		  , #{cstNo}
+		  , #{ciDt}
+		  , #{ciCarNo}
+		  , #{ciCowillYmd}
+		  , #{ciTotalNmpr}
+		  , #{ciAultCnt}
+		  , #{cichildCnt}
+		  , #{setleNo}
+		  , #{carKindNo}
+		  , 'Y'
+		  , 'R'
+		  , #{rsvtDtlNo}
+		)
+	</insert>
+	
+	<insert id="inserChkoutNoCar" parameterType="Map">
+		INSERT INTO TB_CHKIN (
+		    CHKIN_NO
+		    , RM_NO
+		    , CST_NO
+		    , CI_DT
+		    , CI_COWILL_YMD
+		    , CI_TOTAL_NMPR
+		    , CI_ADULT_CNT
+		    , CI_CHILD_CNT
+		    , CI_SETLE_NO
+		    , CI_SETLE_YN
+		    , CI_SE_CD
+		    , RSVT_DTL_NO
+		) VALUES (
+		    #{chkinNo}
+		  , #{rmNo}
+		  , #{cstNo}
+		  , #{ciDt}
+		  , #{ciCowillYmd}
+		  , #{ciTotalNmpr}
+		  , #{ciAultCnt}
+		  , #{cichildCnt}
+		  , #{setleNo}
+		  , 'Y'
+		  , 'R'
+		  , #{rsvtDtlNo}
+		)
+	</insert>
+	
+	<insert id="inserChkout" parameterType="String">
+		INSERT INTO TB_CHKOUT (
+		    CHKIN_NO
+		    , CO_EXCCLC_YN
+		    , CO_EXCCLC_AMNT
+		) VALUES (
+		    #{chkinNo}
+		  , 'N'
+		  , 0
+		)
+	</insert>
+	
+	<update id="updateRoom" parameterType="String">
+		UPDATE 
+			TB_ROOM
+		SET
+		    RM_AVLBL_YN = 'N',
+		    RM_AVLBL_DETAILS = '투숙중'
+		WHERE
+		    RM_NO = #{rmNo}
+	</update>
+	
+	<update id="updateParking" parameterType="String">
+		UPDATE 
+			TB_PARKING 
+		SET 
+			PKG_AMNT = 0
+			, PKG_STAY_YN = 'Y'
+		WHERE 
+			PKG_CAR_NO = #{carNo}
+	</update>
+	
+	<update id="updateRsvt" parameterType="String">
+		UPDATE
+			TB_RSVT_DETAILS
+		SET
+			RSVT_SE = '투숙중'
+		WHERE
+			RSVT_DTL_NO = #{rsvtDtlNo}
+	</update>
+</mapper>

@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+#rmsvc-cnt {
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  padding: 8px; /* 적절한 값으로 조정하세요 */
+}

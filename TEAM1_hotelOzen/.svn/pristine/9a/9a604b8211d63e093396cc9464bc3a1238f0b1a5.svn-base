@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.CarMapper">
+<resultMap type="CarVO" id="CarMap" autoMapping="true">
+	<association property="recomCarVO" javaType="RecomCarVO" autoMapping="true">
+		<id property="recRank" column="REC_RANK"/>
+	</association>
+
+</resultMap>
+
+
+<parameterMap type="hashmap" id="cstmrMap">
+	<parameter property="cstAge"/>
+	<parameter property="cstGen"/>
+</parameterMap>
+
+<select id="selectCar" parameterMap="cstmrMap" resultMap="CarMap">
+
+	SELECT
+		CAR_NO
+		, CAR_NM
+		, CAR_LIM
+		, CAR_KIND
+		, CAR_AGE
+        , REC_RANK
+	FROM 
+		TB_CAR INNER JOIN TB_RECOM_CAR USING (CAR_NO)
+	WHERE 
+		REC_AGE = #{cstAge} AND REC_GEN = #{cstGen}
+    GROUP BY 
+    	CAR_NO, CAR_NM, CAR_LIM, CAR_KIND, CAR_AGE, REC_RANK
+	ORDER BY 
+		REC_RANK
+
+</select>
+<resultMap type="hashmap" id="cstmrMap">
+	<id property="cstAge" column="CST_AGE"/>
+	<id property="cstGen" column="CST_GEN"/>
+</resultMap>
+<select id="selectCstmr" parameterType="string" resultMap="cstmrMap">
+	 <![CDATA[
+	SELECT CST_GEN
+	    , CASE
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 <= 24 THEN 20
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 <= 29 AND (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 >= 25 THEN 25
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 <= 39 AND (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 >= 30 THEN 30
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 <= 49 AND (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 >= 40 THEN 40
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 <= 59 AND (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 >= 50 THEN 50
+	        WHEN (2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1 >= 60 THEN 60
+	    END AS CST_AGE
+	FROM TB_CSTMR
+	WHERE CST_NO = #{cstNo}
+	 ]]>
+</select>
+	
+<insert id="insertCarScrap" parameterType="ScrapVO">
+	INSERT INTO tb_scrap (
+    cst_no
+    , scrap_no
+	) VALUES (
+	    #{cstNo}  
+	   , #{scrapNo} 
+)
+</insert>
+
+<delete id="deleteCarScrap" parameterType="ScrapVO">
+	DELETE 
+	FROM TB_SCRAP
+	WHERE CST_NO = #{cstNo} AND SCRAP_NO= #{scrapNo}
+</delete>
+
+<select id="checkCarScrap" parameterType="ScrapVO">
+	SELECT COUNT(*)
+	FROM TB_SCRAP
+	WHERE CST_NO = #{cstNo} AND SCRAP_NO = #{scrapNo}
+</select>
+
+</mapper>

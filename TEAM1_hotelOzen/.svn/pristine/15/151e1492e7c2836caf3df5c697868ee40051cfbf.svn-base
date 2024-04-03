@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.MberMapper">
+
+	<resultMap type="MberVO" id="mberMap" autoMapping="true">
+		<id property="cstNo" column="CST_NO"/>
+		<association property="cst" javaType="CstmrVO" autoMapping="true"></association>
+		<collection property="mbrsh" javaType="list" ofType="MbrshSetleVO" autoMapping="true">
+			<id property="mbsNo" column="MBS_NO"/>
+		</collection>
+		<collection property="userRoles" ofType="string">
+			<result column="USER_ROLE"/>
+		</collection>
+		<collection property="rsvtList" javaType="list" ofType="RsvtVO" autoMapping="true">
+			<id property="rsvtNo" column="RSVT_NO"/>
+		</collection>
+	</resultMap>
+	<select id="select" parameterType="string" resultMap="mberMap">
+		SELECT
+		    CST_NO
+		  , MBER_ID
+		  , MBER_PW
+		  , MBER_HOME_TEL
+		  , MBER_ADDR
+		  , MBER_SECSN_YN
+		  , MBER_SBSCRB_YMD
+		  , MBER_SPCL_NOTE
+		  , MBER_MBTI
+		  , USER_ROLE
+		  , CST_NM
+		  , CST_HP
+		  , CST_GEN
+		  , CST_BIRTH
+		  , CST_MAIL
+		  , RSVT_YMD
+		  , RSVT_NO
+		  , RSVT_CHECKIN_YMD
+		  , RSVT_CHECKOUT_YMD
+		  , RSVT_ROOM_CNT
+		  , RSVT_ADULT_CNT
+		  , RSVT_CHILD_CNT
+		FROM
+		    TB_MBER
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		    LEFT OUTER JOIN TB_RSVT USING (CST_NO)
+		WHERE 
+			CST_NO = #{cstNo}	
+	</select>
+	
+	<select id="selectByMberId" parameterType="string" resultMap="mberMap">
+		SELECT
+		    CST_NO
+		  , MBER_ID
+		  , MBER_PW
+		  , MBER_HOME_TEL
+		  , MBER_ADDR
+		  , MBER_SECSN_YN
+		  , MBER_SBSCRB_YMD
+		  , MBER_SPCL_NOTE
+		  , MBER_MBTI
+		  , USER_ROLE
+		  , CST_NM
+		  , CST_HP
+		  , CST_GEN
+		  , CST_BIRTH
+		  , CST_MAIL
+		  , MBS_GRD_CD
+		  , MBS_SBSCRB_YMD
+		  , MBS_EXPRT_YMD
+		FROM
+		    TB_MBER
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		    LEFT OUTER JOIN TB_MBRSH_SETLE USING (CST_NO)
+		WHERE 
+			MBER_ID = #{mberId}
+	</select>
+	<resultMap type="MberVO" id="mberListMap" autoMapping="true">
+		<id property="cstNo" column="CST_NO"/>
+		<association property="cst" javaType="CstmrVO" autoMapping="true"></association>
+		<collection property="mbrsh" javaType="list" ofType="MbrshSetleVO" autoMapping="true">
+			<id property="mbsNo" column="MBS_NO"/>
+		</collection>
+	</resultMap>
+	<select id="selectList" resultMap="mberListMap">
+		WITH ORDERD AS (
+		    SELECT
+		        TB_MBER.CST_NO
+		        , TB_MBER.MBER_ID
+		        , TB_MBER.MBER_SBSCRB_YMD
+		        , TB_CSTMR.CST_NM
+		        , TB_CSTMR.CST_HP
+		        , TB_MBRSH_SETLE.MBS_GRD_CD
+		        , TB_MBRSH_SETLE.MBS_EXPRT_YMD
+		    FROM
+		        TB_MBER
+		        INNER JOIN TB_CSTMR ON TB_MBER.CST_NO = TB_CSTMR.CST_NO
+		        LEFT OUTER JOIN TB_MBRSH_SETLE ON (TB_MBER.CST_NO = TB_MBRSH_SETLE.CST_NO)
+	            AND TB_MBRSH_SETLE.MBS_EXPRT_YMD > SYSDATE
+		    WHERE
+		        TB_MBER.MBER_SECSN_YN IS NULL
+		    ORDER BY
+		        TB_MBER.MBER_SBSCRB_YMD DESC
+		),
+		RNUMMEMBER AS (
+		    SELECT ORDERD.*, ROWNUM RNUM
+		    FROM ORDERD
+		)
+		SELECT *
+		FROM RNUMMEMBER
+   </select>
+   
+	<select id="selectMberByUserName" parameterType="string" resultMap="mberMap">
+		SELECT CST_NO, MBER_ID, MBER_PW, CST_NM, USER_ROLE, MBER_SECSN_YN
+		FROM TB_MBER
+			INNER JOIN TB_CSTMR USING (CST_NO)
+		WHERE 
+			MBER_ID = #{username}
+	</select>
+	
+	<select id="selectNewCstNo" resultType="string">
+		SELECT
+		    CASE
+		        WHEN COUNT(*) > 0 THEN 'M' || SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) || LPAD(max(SUBSTR((cst_no), -2, 5)) +1 , 5, '0')
+		    ELSE	
+		        'M' || SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) || LPAD('1', 5, '0')
+		END AS result
+		FROM tb_cstmr
+		WHERE 
+		    SUBSTR(cst_no, 2, 2) LIKE SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2)
+		
+	</select>
+
+	<insert id="insertMber" parameterType="RegistVO">
+		INSERT INTO tb_mber (
+		    CST_NO
+		    , MBER_ID
+		    , MBER_PW
+		    , MBER_HOME_TEL
+		    , MBER_ADDR
+		    , MBER_SBSCRB_YMD
+		    , MBER_MBTI
+		) VALUES (
+		    #{cstNo}
+		    , #{mberId}
+		    , #{mberPw}
+		    , #{mberHomeTel}
+		    , #{mberAddr}
+		    , SYSDATE
+		    , #{mberMbti}
+		)
+	</insert>
+	<select id="findMberUser" parameterType="RegistVO">
+		SELECT 
+		    CST_NO
+		    , CST_NM
+		    , CST_HP
+		FROM TB_CSTMR
+		WHERE CST_CLSFC_CD = 'M'
+		    AND CST_NM = #{cstNm}
+		    AND CST_HP = #{cstHp}
+	</select>
+	
+	<update id="updateCst" parameterType="RegistVO">
+		UPDATE TB_CSTMR
+		SET CST_MAIL = #{cstMail}
+		WHERE CST_NO = #{cstNo}
+	</update>
+	<update id="updateMber" parameterType="RegistVO">
+		UPDATE TB_MBER
+		SET 
+			MBER_ADDR = #{mberAddr}
+			, MBER_MBTI = #{mberMbti}
+		WHERE CST_NO = #{cstNo}
+	</update>
+	
+	<update id="changePwd" parameterType="MberVO">
+		UPDATE TB_MBER
+		SET	MBER_PW = #{mberPw}
+		WHERE MBER_ID = #{mberId}
+	</update>
+	
+	<resultMap type="MberVO" id="subscriber" autoMapping="true">
+		<id property="cstNo" column="CST_NO" />
+		<association property="cst" autoMapping="true" javaType="CstmrVO"/>
+	</resultMap>
+	
+	<select id="selectSubscriber" resultMap="subscriber">
+		SELECT
+			CST_NO
+			, CST_NM
+			, CST_HP
+			, CST_MAIL
+			, MBER_ADDR
+		FROM TB_MBER INNER JOIN TB_CSTMR USING (CST_NO)
+		WHERE CST_NO = #{cstNo}
+	</select>
+	
+	<resultMap type="MberVO" id="mypageMber" autoMapping="true">
+		<id property="cstNo" column="CST_NO"/>
+		<association property="cst" javaType="CstmrVO" autoMapping="true"/>
+		<collection property="mbrsh" autoMapping="true" javaType="list" ofType="MbrshSetleVO"/>
+		<collection property="couponList" autoMapping="true" javaType="list" ofType="CouponVO"/>
+	</resultMap>
+	
+	<select id="selectMypage" resultMap="mypageMber">
+		SELECT 
+		    CST_NO
+		    , MBER_ID
+		    , MBER_ADDR
+		    , MBER_MBTI
+		    , CST_NM
+		    , CST_HP
+		    , CST_BIRTH
+		    , SUBSTR(CST_MAIL, 1, INSTR(CST_MAIL, '@') - 1) AS CST_MAIL
+            , SUBSTR(CST_MAIL, INSTR(CST_MAIL, '@') + 1) AS MAIL_ADDR
+		    , DECODE(CST_GEN, 'F', 'FEMALE', 'M', 'MALE')
+		    , MBS_GRD_CD
+		    , CPN_NO
+		    , CPN_ISSU_YMD
+		    , CPN_EXPRT_YMD
+		    , CPN_AVAIL_YN
+		    , CPN_USE_YMD
+		    , CPNK_NO
+		    , CPNK_NM
+		    , CPN_USE
+		    , CPN_DSCNT_PRICE
+		    , (SELECT 
+		    	SUM(CASE WHEN MLG_USE_CD = 'ADD' THEN MLG_AMNT ELSE 0 END) 
+	    		FROM tb_mileage 
+	    	WHERE CST_NO = #{cstNo})
+		    	+
+    		(SELECT 
+    			SUM(CASE WHEN MLG_USE_CD = 'USE' THEN -MLG_AMNT ELSE 0 END) 
+   				FROM TB_MILEAGE 
+   				WHERE CST_NO = #{cstNo}) AS MBER_MILEAGE
+		FROM
+		    TB_MBER 
+		INNER JOIN 
+		    TB_CSTMR USING (CST_NO)
+		LEFT OUTER JOIN 
+		    TB_COUPON_ISN USING (CST_NO)
+		LEFT OUTER JOIN
+		    TB_MBRSH_SETLE USING (CST_NO)
+		LEFT OUTER JOIN
+			TB_COUPON USING (CPNK_NO)
+		WHERE 
+		    CST_NO = #{cstNo}
+			AND (
+				SYSDATE BETWEEN MBS_SBSCRB_YMD AND MBS_EXPRT_YMD
+				OR MBS_SETLE_NO IS NULL)				
+	</select>
+	<select id="selectCouponCnt" resultType="MberVO">
+		SELECT 
+		    CST_NO
+		    , NVL(COUNT(CPN_AVAIL_YN),0) AS TOTAL_COUPON
+		    , NVL(SUM(CASE WHEN CPN_AVAIL_YN = 'Y' THEN 1 ELSE 0 END),0) AS AVAIL_COUPON
+		    , NVL(SUM(CASE WHEN CPN_AVAIL_YN = 'N' THEN 1 ELSE 0 END),0) AS UN_AVAIL_COUPON
+		    , NVL(SUM(CASE WHEN CPN_AVAIL_YN = 'U' THEN 1 ELSE 0 END),0) AS USED_COUPON
+		FROM TB_CSTMR LEFT OUTER JOIN TB_COUPON_ISN USING (CST_NO)
+		WHERE CST_NO = #{cstNo}
+		GROUP BY CST_NO
+	</select>
+	
+	<select id="selectMileageList" resultType="MileageVO">
+       SELECT
+		    CST_NO
+		  , MLG_YMD
+		  , MLG_AMNT
+		  , DECODE(MLG_USE_CD, 'ADD', '추가', 'USE', '사용') AS MLG_USE_CD
+		  , MLG_SORT
+		FROM
+		    TB_MILEAGE
+		WHERE
+			CST_NO = #{cstNo}
+		ORDER BY 
+			MLG_YMD DESC
+	</select>
+	
+	<update id="updatePwd" parameterType="MberVO">
+		UPDATE TB_MBER
+		SET 
+			MBER_PW = #{newPw}
+		WHERE 
+			CST_NO = #{cstNo}
+	</update>
+	
+	<update id="secsnUpdate">
+		UPDATE TB_MBER
+		SET
+			MBER_SECSN_YN = 'Y'
+		WHERE 
+			CST_NO = #{cstNo}
+	</update>
+	
+	<update id="deletePrivacy">
+		UPDATE TB_MBER
+		SET
+			MBER_HOME_TEL = NULL
+			, MBER_ADDR = NULL
+			, MBER_MBTI = NULL
+		WHERE 
+			MBER_SECSN_YN = 'Y'
+	</update>
+	<update id="deletePrivacyCst">
+		UPDATE TB_CSTMR
+		SET
+			CST_NM = NULL
+			, CST_HP = NULL
+			, CST_BIRTH = NULL
+			, CST_GEN = NULL
+			, CST_MAIL = NULL
+		WHERE 
+			CST_NO = (SELECT CST_NO FROM TB_MBER WHERE 
+			MBER_SECSN_YN = 'Y')
+			AND CST_CLSFC_CD = 'N'	
+	</update>
+	<update id="cancleSecsn">
+		UPDATE TB_MBER
+		SE  MBER_SECSN_YN = NULL
+		WHERE MBER_ID = #{username}
+			
+	</update>
+</mapper>

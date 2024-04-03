@@ -1,0 +1,120 @@
+@charset "UTF-8";
+
+.myAccountBox {
+    border: 1px solid #000;
+}
+
+.myAccountInfo {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    padding: 33px 0 34px;
+}
+
+.myAccountInfo dl {
+    display: table-cell;
+    vertical-align: top;
+    padding: 0 39px 0 37px;
+}
+
+.myAccountInfo dt {
+    padding-bottom: 17px;
+    font: 500 16px notokrR;
+    letter-spacing: -.025em;
+    position: relative;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    empty-cells: show;
+    border-spacing: 0;
+    display: table;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: initial;
+    border-spacing: 2px;
+    border-color: gray;
+    color: #000;
+    font-family: notokrL, gothamL, playfair;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+caption {
+    display: table-caption;
+    text-align: -webkit-center;
+}
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+.tblH thead tr th:first-child, .tblH tbody tr td:first-child {
+    border-left: none;
+}
+
+.tblH thead tr th {
+    padding: 16px;
+    font-size: 17px;
+    border-top: 1px solid #000;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: gothamM, notokrM;
+    color: #333;
+}
+
+.tblH thead tr th, .tblH tbody tr td {
+    font-family: gothamL, notokrL;
+    text-transform: uppercase;
+    background: #fff;
+}
+
+.tblH tbody tr td {
+    padding: 16px;
+    font-size: 17px;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border-color: inherit;
+	text-align:center;
+	padding-block: 10px;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+.tblH thead tr th:first-child, .tblH tbody tr td:first-child {
+    border-left: none;
+}
+
+.noData .txt:before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 45px;
+    margin: 0 auto 30px;
+}
+
+
+
+

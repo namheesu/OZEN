@@ -1,0 +1,116 @@
+@charset "UTF-8";
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tab_start{
+	position:fixed;
+  	width:60px;
+  	height:60px;
+  	bottom:100px;
+  	right:40px;
+}
+.btn {
+    display: inline-block;
+}
+/* .recom-table{ */
+/* 	max-width: 800px; */
+/* } */
+.recom-div{
+	display:flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.scrapModal {
+	transform: translateX(200px) translateY(170px);
+}
+.tab_start {
+	 z-index: 1060;
+}
+.modal-content {
+	z-index : 1060;
+}
+.bi {
+	display:inline-block;
+	font-size:25px
+}
+.wish-area { 
+	position:absolute; 
+	top:20px;
+	right:20px;
+	width:30px;
+	height:50px;
+}
+.card-header{position:relative}
+
+.teb_start > img {
+	width : 50px;
+	height : 50px;
+}
+
+.carTab {
+	font-size : 50px;
+	
+}
+
+/* 스크랩 정보가 없을 경우 css */
+.feather {
+	width: 50px;
+	height: 50px;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	fill: none;
+}
+
+.modalBody {
+	height : 800vh;
+}
+
+
+.noData {
+    text-align: center;
+    padding: 130px 0 !important;
+    width: 100% !important;
+    font-size: 16px;
+    list-style-type: none;
+}
+
+.noLogin {
+    text-align: center;
+    padding: 70px 0 !important;
+    width: 100% !important;
+    font-size : 50px;
+    list-style-type: none;
+}
+.noLogin_txt {
+	font-size: 16px;
+}
+
+.noData .txt:before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 45px;
+    margin: 0 auto 30px;
+    background: url(../../assets/img/ExclamationMark.png)
+}
+
+.noLogin_login {
+	width : 120px;
+	height : 50px;
+	font-size : 17px;
+	padding-top : 5px;
+	border: none;
+}
+
+
+/**/
+.nav-tabs .nav-link {
+    font-size: 20px; /* 원하는 크기로 설정 */
+    font-weight : 500;
+}

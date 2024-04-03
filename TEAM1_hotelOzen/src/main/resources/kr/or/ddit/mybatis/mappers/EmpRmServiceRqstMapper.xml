@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpRmServiceRqstMapper">
+	
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RSOD_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RS_CD LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR CST_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RS_MENU_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND RSOD_SE = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+		</trim>
+	</sql>
+	
+	<sql id="rmRqList">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			<include refid="searchFrag" />
+        </if>
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+	    	<include refid="searchFrag" />
+	    </if>
+		<if test="!@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord
+					and !@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord))">
+	    	WHERE RSOD_SE = '준비중' OR RSOD_SE = '완료'
+	    </if>
+	</sql>
+	
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM TB_RMSERVICE_ORDER 
+		    INNER JOIN TB_RMSERVICE_DETAILS USING (RSOD_NO)
+		    INNER JOIN TB_RMSERVICE USING(RS_CD)
+		    INNER JOIN TB_CHKIN USING(CHKIN_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		<include refid="searchFrag" />
+	</select>
+
+	<resultMap type="RmserviceOrderVO" id="rmSRqstMap" autoMapping="true">
+		<id property="rsodNo" column="RSOD_NO"/>
+		<result property="rsodDt" column="RSOD_DT"/>
+		<result property="rsodSe" column="RSOD_SE"/>
+		<association property="chkin" javaType="ChkinVO">
+			<id property="chkinNo" column="CHKIN_NO"/>
+			<result property="rmNo" column="RM_NO"/>
+			<association property="cstmr" javaType="CstmrVO">
+				<id property="cstNo" column="CST_NO"/>
+				<result property="cstNm" column="CST_NM"/>
+			</association>
+		</association>
+		<collection property="rmServiceDList" javaType="list" ofType="RmserviceDetailsVO">
+			<id property="rsodNo" column="RSOD_NO"/>
+			<association property="rmService" javaType="RmserviceVO">
+				<id property="rsCd" column="RS_CD"/>
+				<result property="rsMenuNm" column="RS_MENU_NM"/>	
+			</association>
+		</collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="rmSRqstMap" parameterType="PaginationInfo">
+		WITH RNUMRMSO AS(
+			SELECT
+				ROWNUM RNUM, A.*
+			FROM(
+				SELECT 
+				    RSOD_NO
+				    , RS_CD
+				    , RM_NO
+				    , CST_NM
+			        , RSOD_DT
+				    , RSOD_SE
+				    , CHKIN_NO
+				    , RS_MENU_NM
+				FROM 
+					TB_RMSERVICE_ORDER 
+				    INNER JOIN TB_RMSERVICE_DETAILS USING (RSOD_NO)
+				    INNER JOIN TB_RMSERVICE USING(RS_CD)
+				    INNER JOIN TB_CHKIN USING(CHKIN_NO)
+				    INNER JOIN TB_CSTMR USING (CST_NO)
+           		<include refid="rmRqList" />
+				ORDER BY RSOD_NO DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMRMSO
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+		
+	</select>
+</mapper>

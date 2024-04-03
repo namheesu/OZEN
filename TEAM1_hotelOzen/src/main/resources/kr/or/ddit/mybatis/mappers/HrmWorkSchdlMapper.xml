@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.HrmWorkSchdlMapper">
+
+<sql id="searchFrag">
+	
+
+</sql>
+
+
+
+
+<select id="selectTotalRecord">
+	SELECT COUNT(*)
+	FROM TB_WORK_SCHDL
+	<include refid="searchFrag" />
+</select>
+
+<select id="selectList" resultType="WorkSchdlVO">
+	
+	WITH RNUMWORKSCHDL AS (
+		SELECT ROWNUM RNUM, A.*
+		FROM(
+			SELECT 
+				EMP_NO
+				, TB_WORK_SCHDL.EMP_NM
+				, EMP_DEPT
+				, WORK_DATE
+				, WORK_TYPE
+			FROM TB_WORK_SCHDL LEFT OUTER JOIN TB_EMP USING(EMP_NO)
+			<include refid="searchFrag" />
+			ORDER BY WORK_DATE DESC, EMP_NO
+		) A
+	)
+	SELECT * 
+	FROM RNUMWORKSCHDL
+	<where>
+		<if test="startRow gt 0 and endRow gt 0">
+			<![CDATA[
+				RNUM >= #{startRow} AND RNUM <= #{endRow}
+			]]>
+		</if>
+	</where>
+</select>
+
+<insert id="insert" parameterType="WorkSchdlVO">
+	INSERT INTO TB_WORK_SCHDL (
+    	EMP_NO
+	    , EMP_NM
+	    , WORK_DATE
+	    , WORK_TYPE
+	) VALUES (
+		  #{empNo,jdbcType=VARCHAR}
+		, #{empNm,jdbcType=VARCHAR}
+		, #{workDate,jdbcType=DATE}
+		, #{workType,jdbcType=VARCHAR}
+	)
+</insert>
+
+<update id="update" parameterType="WorkSchdlVO">
+	UPDATE TB_WORK_SCHDL
+	SET
+		WORK_TYPE = #{workType,jdbcType=VARCHAR}
+	WHERE
+	    EMP_NO = #{empNo,jdbcType=VARCHAR}
+	    AND WORK_DATE = #{workDate,jdbcType=DATE}
+</update>
+
+<delete id="delete" parameterType="string">
+	DELETE FROM TB_WORK_SCHDL
+	WHERE 
+	<![CDATA[
+		WORK_DATE >= TO_DATE((#{target2}, 'yyyy/mm/dd')) AND WORK_DATE <= TO_DATE(#{target2), 'yyyy/mm/dd'))
+	]]>
+</delete>
+
+</mapper>

@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+.go-btn{
+	display :inline-block;
+}
+
+.modal-backdrop{
+  position: fixed;
+  top:0; left: 0; bottom: 0; right: 0;
+  background-color:rgba(0, 0, 0, 0);
+}
+
+@font-face { 
+  font-family: "DS-DIGI";
+  src: url("font/DS-DIGI.TTF") format("truetype");
+  font-weight: normal;
+} 
+
+#now {
+  font-family: 'DS-DIGI', serif;
+  font-size: 60px;
+}
+
+/* 근태조회 */
+.empNoInput {
+	width : 100px;
+}

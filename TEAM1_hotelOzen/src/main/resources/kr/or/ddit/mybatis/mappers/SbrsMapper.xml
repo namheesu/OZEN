@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.SbrsMapper">
+
+<resultMap type="SbrsVO" id="SbrsMap" autoMapping="true">
+	<association property="recomSbrsVO" javaType="RecomSbrsVO" autoMapping="true">
+		<id property="recomRank" column="RECOM_RANK" />
+	</association>
+</resultMap>
+
+<parameterMap type="hashmap" id="cstmrMap">
+	<parameter property="mbti"/>
+	<parameter property="season"/>
+	<parameter property="age"/>
+</parameterMap>
+
+<select id="selectRecomSbrs" resultMap="SbrsMap" parameterMap="cstmrMap">
+   SELECT
+      SBRS_CD
+        , SBRS_UTLZT_DT
+        , SBRS_UTLZT_DATE
+        , SBRS_FLOOR
+        , SBRS_NM
+        , SBRS_ADULT_FEE
+        , SBRS_CHILD_FEE
+        , SBRS_DETAIL
+        , RECOM_RANK
+   FROM 
+      TB_SBRS INNER JOIN TB_RECOM_SBRS USING (SBRS_CD)
+   WHERE 
+      MBTI = #{mbti} AND RECOM_SEASON = #{season} AND RECOM_AGE = #{age}
+   ORDER BY 
+      RECOM_RANK
+</select>
+
+
+<resultMap type="hashmap" id="cstmrMap" autoMapping="true">
+	<result property="age" column="age" />
+	<result property="mbti" column="MBTI" />
+	<result property="season" column="SEASON" />
+</resultMap>
+<select id="selectSbrs" parameterType="string" resultMap="cstmrMap">
+	<![CDATA[
+	SELECT *
+	FROM (
+	    SELECT
+	        SUBSTR(TB_MBER.mber_mbti,0,1) AS MBTI,
+	        CASE 
+	            WHEN EXTRACT(MONTH FROM SYSDATE) BETWEEN 3 AND 5 THEN 'spring'
+	            WHEN EXTRACT(MONTH FROM SYSDATE) BETWEEN 6 AND 8 THEN 'summer'
+	            WHEN EXTRACT(MONTH FROM SYSDATE) BETWEEN 9 AND 11 THEN 'autumn'
+	            ELSE 'winter'
+	        END AS season,
+	        CASE 
+	            WHEN (EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM tb_cstmr.cst_birth)) BETWEEN 20 AND 39 THEN '20-30'
+	            WHEN (EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM tb_cstmr.cst_birth)) BETWEEN 40 AND 59 THEN '40-50'
+	            ELSE '60-'
+	        END AS age
+	    FROM TB_CSTMR
+	        INNER JOIN TB_MBER ON (TB_CSTMR.CST_NO=TB_MBER.CST_NO)
+	    WHERE tb_cstmr.cst_no = #{cstNo}
+	)
+	WHERE ROWNUM <= 1
+	]]>
+</select>
+
+<insert id="insertSbrsScrap" parameterType="ScrapVO">
+	INSERT INTO tb_scrap (
+    cst_no
+    , scrap_no
+	) VALUES (
+	    #{cstNo}  
+	   , #{scrapNo} 
+)
+</insert>
+
+<delete id="deleteSbrsScrap" parameterType="ScrapVO">
+	DELETE 
+	FROM TB_SCRAP
+	WHERE CST_NO = #{cstNo} AND SCRAP_NO= #{scrapNo}
+</delete>
+
+<select id="checkSbrsScrap" parameterType="ScrapVO">
+	SELECT COUNT(*)
+	FROM TB_SCRAP
+	WHERE CST_NO = #{cstNo} AND SCRAP_NO = #{scrapNo}
+</select>
+
+</mapper>

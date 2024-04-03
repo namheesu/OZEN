@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpRsvtMapper">
+
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RSVT_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR CST_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND RSVT_SE = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+		</trim>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_RSVT
+		    INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
+		    INNER JOIN TB_CSTMR USING(CST_NO)
+		<include refid="searchFrag" />
+	</select>
+
+	<resultMap type="RsvtVO" id="rsvtMap" autoMapping="true">
+	    <id property="rsvtNo" column="RSVT_NO"/>
+	    <association property="cstmr" javaType="CstmrVO" autoMapping="true">
+	        <id property="cstNo" column="CST_NO"/>
+	    </association>
+	    <collection property="rsvtDetails" javaType="list" ofType="RsvtDetailsVO" autoMapping="true">
+	        <id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        <association property="roomTypeVO" javaType="RoomTypeVO">
+	        	<id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        	<result property="rmtNmDetails" column="RMT_NM_DETAILS"/>
+	        </association>
+	    </collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="rsvtMap" parameterType="PaginationInfo" >
+		WITH RNUMRSVT AS (
+			SELECT 
+				ROWNUM RNUM, A.*    
+		    FROM (
+		    	SELECT 
+		    		RSVT_NO
+				    , CST_NM
+				    , RSVT_YMD
+				    , RSVT_CHECKIN_YMD
+				    , RMT_TYPE_CD
+				    , RMT_NM_DETAILS
+				    , RSVT_ROOM_CNT
+				    , RSVT_ADULT_CNT
+				    , RSVT_CHILD_CNT
+				    , RSVT_SE
+				    , CST_NO
+				    , RSVT_AMNT
+				    , RSVT_CNCL_YN
+				    , RSVT_SETLE_NO
+				FROM 
+				    TB_RSVT
+				    INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
+				    INNER JOIN TB_CSTMR USING(CST_NO)
+				    INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
+				<include refid="searchFrag" />
+                GROUP 
+                	BY RSVT_NO
+				    , CST_NM
+				    , RSVT_YMD
+				    , RSVT_CHECKIN_YMD
+				    , RMT_TYPE_CD
+				    , RMT_NM_DETAILS
+				    , RSVT_ROOM_CNT
+				    , RSVT_ADULT_CNT
+				    , RSVT_CHILD_CNT
+				    , RSVT_SE
+				    , CST_NO
+				    , RSVT_AMNT
+				    , RSVT_CNCL_YN
+				    , RSVT_SETLE_NO
+				ORDER BY RSVT_NO DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMRSVT
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select> 
+
+	<select id="select" resultMap="rsvtMap" parameterType="String">
+		SELECT 
+		    RSVT_NO
+		    , CST_NM
+		    , CST_HP
+		    , CST_BIRTH
+		    , RSVT_YMD    
+		    , RSVT_CHECKIN_YMD
+		    , RSVT_CHECKOUT_YMD
+		    , RSVT_ROOM_CNT
+		    , RSVT_ADULT_CNT
+		    , RSVT_CHILD_CNT
+		    , RMT_TYPE_CD
+		    , RMT_TYPE_CD
+		    , RSVT_SE
+		    , RSVT_AMNT    
+		    , CST_NO
+		FROM 
+		    TB_RSVT
+		    INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
+		    INNER JOIN TB_CSTMR USING(CST_NO)
+		WHERE
+		    RSVT_NO = #{rsvtNo}
+	</select>
+
+	<update id="updateCXL" parameterType="String">
+	    <![CDATA[
+	      BEGIN
+	        UPDATE 
+	        	TB_RSVT 
+	        SET 
+	        	RSVT_CNCL_YN = 'Y' 
+	        WHERE 
+	        	RSVT_NO=#{rsvtNo};
+	        	
+	        UPDATE 
+	        	TB_RSVT_DETAILS 
+	        SET 
+	        	RSVT_SE = '예약취소' 
+	        WHERE 
+	        	RSVT_NO=#{rsvtNo};
+	      END;
+	    ]]>
+	</update>
+	  
+</mapper>

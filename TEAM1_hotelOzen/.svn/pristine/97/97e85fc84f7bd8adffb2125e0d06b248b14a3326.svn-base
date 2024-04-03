@@ -1,0 +1,169 @@
+@charset "UTF-8";
+
+.inner {
+	position: relative;
+	margin: 0 auto;
+	padding-bottom: 180px;
+	width: 1420px;
+}
+
+.selResult .inner {
+	padding: 42px 0;
+}
+.un-radi{
+	border-radius: unset;
+}
+.rs-body tr>td {
+	width: 150px;
+}
+
+.rs-body tr>th {
+	width: 170px;
+	height: 40px;
+	text-align: right;
+	padding-right: 0px;
+}
+
+.selResult {
+	background: #f9f9f9;
+	margin-bottom: 100px;
+}
+
+.selResult .infoArea {
+	position: relative;
+}
+.table{
+	width: 930px;
+}
+
+.rsvt-title {
+	font-weight: 700;
+	font-size: 40px;
+}
+.jungChultFont{
+	font-family: JungChul !important;
+	font-weight: 500;
+}
+.rsvt-cost {
+	font-weight: 700;
+	font-size: 40px;
+	text-align: right;
+	width: 260px;
+}
+
+.r-box {
+	border: 1px solid #ccc;
+	height: 200px;
+	padding: 32px;
+}
+
+.rs-table {
+	width: 450px;
+}
+
+.rs-btn {
+	width: 300px;
+}
+
+.py-cus {
+	padding-top: 18px;
+	margin-right: auto;
+}
+
+.rs-body {
+	font-size: 18px;
+}
+
+.rs-fo {
+	align-self: flex-end;
+	width: 380px;
+}
+
+.selResult .infoArea dl.dlType01 {
+	margin-left: 40px;
+	padding-right: 160px;
+}
+
+.selResult .infoArea dl.dlType02 {
+	padding-right: 110px;
+}
+
+.selResult .infoArea dl.dlType03 {
+	text-align: center;
+	padding-right: 110px;
+}
+
+.rom-img {
+	width: 400px;
+	height: 250px;
+	margin: 0 auto;
+}
+
+.d-flex {
+	display: flex;
+}
+
+.container {
+	max-width: 960px;
+}
+
+.mar {
+	margin-right: 70px;
+}
+
+th {
+	padding-right: 10px;
+	width: 75px;
+	height: 40px;
+}
+
+td {
+	padding-right: 20px;
+	text-align: left;
+	width: 200px;
+}
+
+.rsv-btn {
+	text-align: center;
+	width: 380px;
+	margin-left: 4px;
+	height: 53px;
+}
+.center{
+	display: flex;
+	justify-content: center;
+}
+.center{
+	display:flex;
+	justify-content: center;
+}
+#rsvtNo{
+	width: 20%;
+	color: white;
+}
+#cstmrNm{
+	width: 18%;
+	color: white;
+}
+#roomCnt{
+	width: 10%;
+	color: white;
+}
+#adultCnt{
+	width: 10%;
+	color: white;
+}
+#childCnt{
+	width: 10%;
+	color: white;
+}
+#rsvtYmd{
+	color: white;
+}
+.black{
+	background-color: black;
+}
+.box{
+	display: flex;
+	justify-content: center;
+}

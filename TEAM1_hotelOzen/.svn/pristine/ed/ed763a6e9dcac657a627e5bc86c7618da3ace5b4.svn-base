@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.CertMapper">
+	
+	<select id="selectCert" parameterType="string" resultType="CertVO">
+		SELECT
+			CERT_NO
+			, CERT_NM
+			, SCORE
+		FROM TB_CERT_POSS
+			INNER JOIN TB_CERT USING (CERT_NO)
+		WHERE EMP_NO = #{empNo}
+		ORDER BY CERT_NO
+	</select>
+	<select id="selectRecomCert" parameterType="EmpVO" resultType="CertVO">
+		SELECT
+			CERT_NO
+			, CERT_NM
+			, RECOM_RANK
+			, CERT_DETAIL_LINK
+			, CERT_DETAIL
+		FROM TB_RECOM_CERT
+			INNER JOIN TB_CERT USING (CERT_NO)
+		WHERE EMP_DEPT = #{empDept} 
+			AND EMP_ANNUAL = #{empAnnual}
+		ORDER BY RECOM_RANK
+	</select>
+</mapper>

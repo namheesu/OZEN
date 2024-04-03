@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+/* 페이지 제목 */
+.cstmr-title{
+	font-size: 2.5rem;
+/* 	font-weight: 600; */
+	font-family : bold;
+	line-height: 1.25;
+	letter-spacing: 0.06em;
+	margin-top: 5rem;
+	color: #000000;
+}
+/* 제목 부가설명 */
+.cstmr-content {
+	font-size: 1rem;
+	font-weight: 400;
+	letter-spacing: -0.025em;
+	line-height: 1.4;
+	color: #000000;
+	letter-spacing : 2px;
+}
+
+
+
+/* 스크롤바 설정*/
+::-webkit-scrollbar{
+  width: 17px;
+}
+
+/* 스크롤바 막대 설정*/
+::-webkit-scrollbar-thumb{
+  /* 스크롤바 둥글게 설정    */
+  border-radius: 10px; 
+  background-color : #d7d9d3;
+}
+
+/* 스크롤바 뒷 배경 설정*/
+::-webkit-scrollbar-track{
+	
+}

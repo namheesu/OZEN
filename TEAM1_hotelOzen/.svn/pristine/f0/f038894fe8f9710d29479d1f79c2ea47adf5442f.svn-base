@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.RecomMbrshMapper">
+
+<select id="select" resultType="RecomMbrshVO" parameterType="string">
+	SELECT
+	    CST_NO
+	  , RECOM_MBRSH_1
+	  , DECODE(RECOM_MBRSH_1
+	  			, 'BBLUE', '0'
+	  			, 'LBLUE', '1'
+	  			, 'DBLUE', '2'
+	  			, 'BGREEN', '3'
+	  			, 'LGREEN', '4'
+	  			, 'DGREEN', '5'
+	  			, 'BRED', '6'
+	  			, 'LRED', '7'
+	  			, 'DRED', '8'
+	  			, 'BBLACK', '9'
+	  			, 'LBLACK', '10'
+	  			, 'DBLACK', '11'
+	  			, '9')
+	  			AS RECOM_MBRSH_LBL_1
+	  , RECOM_MBRSH_2
+	  , DECODE(RECOM_MBRSH_2
+	  			, 'BBLUE', '0'
+	  			, 'LBLUE', '1'
+	  			, 'DBLUE', '2'
+	  			, 'BGREEN', '3'
+	  			, 'LGREEN', '4'
+	  			, 'DGREEN', '5'
+	  			, 'BRED', '6'
+	  			, 'LRED', '7'
+	  			, 'DRED', '8'
+	  			, 'BBLACK', '9'
+	  			, 'LBLACK', '10'
+	  			, 'DBLACK', '11'
+	  			, '9')
+	  			AS RECOM_MBRSH_LBL_2
+	  , RECOM_MBRSH_3
+	  , DECODE(RECOM_MBRSH_3
+	  			, 'BBLUE', '0'
+	  			, 'LBLUE', '1'
+	  			, 'DBLUE', '2'
+	  			, 'BGREEN', '3'
+	  			, 'LGREEN', '4'
+	  			, 'DGREEN', '5'
+	  			, 'BRED', '6'
+	  			, 'LRED', '7'
+	  			, 'DRED', '8'
+	  			, 'BBLACK', '9'
+	  			, 'LBLACK', '10'
+	  			, 'DBLACK', '11'
+	  			, '9')
+	  			AS RECOM_MBRSH_LBL_3
+	FROM
+	    TB_RECOM_MBRSH
+	WHERE CST_NO = #{cst_no} AND ROWNUM = 1
+</select>
+
+<select id="selectHistoryAndMembsh" resultType="RecomMbrshVO" parameterType="string">
+	SELECT * 
+	FROM 
+	    (SELECT 
+	        B.CST_NO
+	        , RECOM_MBRSH_1
+	        , RECOM_MBRSH_2
+	        , RECOM_MBRSH_3
+	    FROM
+	        TB_RECOM_MBRSH A INNER JOIN 
+	            (SELECT 
+	                NVL(RM_CNT, 0) AS RM_CNT
+	                , NVL(SBRS_CNT,0) AS SBRS_CNT
+	                , NVL(LONGSTAY_CNT,0) AS LONGSTAY_CNT
+	                , NVL(VISIT_CNT,0) AS VISIT_CNT
+	                , CST_NO
+	            FROM TB_MBER 
+	            LEFT OUTER JOIN 
+	                (SELECT CST_NO, COUNT(*) AS RM_CNT 
+	                FROM TB_RMSERVICE_ORDER INNER JOIN TB_CHKIN USING (CHKIN_NO)
+	                GROUP BY CST_NO) USING (CST_NO)
+	            LEFT OUTER JOIN 
+	                (SELECT CST_NO, COUNT(*) AS SBRS_CNT
+	                FROM TB_SBRS_SETLE INNER JOIN TB_SETLE ON (SETLE_NO = SBRS_USE_SETLE_NO)
+	                GROUP BY CST_NO) USING (CST_NO)
+	            LEFT OUTER JOIN 
+	                (SELECT CST_NO, COUNT(*) AS LONGSTAY_CNT
+	                FROM TB_CHKOUT LEFT OUTER JOIN TB_CHKIN USING (CHKIN_NO)
+	                WHERE (
+	                EXTRACT(DAY FROM (CO_DT - CI_DT)) * 24 * 60 * 60
+	                + EXTRACT(HOUR FROM (CO_DT - CI_DT)) * 60 * 60
+	                + EXTRACT(MINUTE FROM (CO_DT - CI_DT)) * 60
+	                + EXTRACT(SECOND FROM (CO_DT - CI_DT))
+	                ) >= (10 * 24 * 60 * 60) 
+	                GROUP BY CST_NO) USING (CST_NO)
+	            LEFT OUTER JOIN 
+	                (SELECT CST_NO, COUNT(*) AS VISIT_CNT
+	                FROM TB_CHKIN GROUP BY CST_NO) USING (CST_NO)
+	            WHERE CST_NO = #{cst_no}
+	            ) B 
+	    ON(
+	        A.RM_CNT = B.RM_CNT 
+	        AND A.SBRS_CNT = B.SBRS_CNT 
+	        AND A.LONGSTAY_CNT = B.LONGSTAY_CNT
+	        AND A.VISIT_CNT = B.VISIT_CNT)
+	    ORDER BY DBMS_RANDOM.RANDOM)
+	<![CDATA[
+	WHERE ROWNUM <=1
+	]]> 
+</select>
+
+<select id="selectRandomRecom"  resultType="RecomMbrshVO">
+	WITH RECOM AS (
+		SELECT A.*, ROWNUM RNUM
+		FROM
+			(SELECT MBS_GRD_CD
+			FROM
+			TB_MBRSH_GRD
+			ORDER BY DBMS_RANDOM.RANDOM) A
+				<![CDATA[
+			WHERE ROWNUM <=3
+				]]> 
+			) 
+	SELECT 
+		(SELECT MAX(MBS_GRD_CD) FROM RECOM WHERE RNUM = 1) AS RECOM_MBRSH_1
+		,(SELECT MAX(MBS_GRD_CD) FROM RECOM WHERE RNUM = 2) AS RECOM_MBRSH_2
+		,(SELECT MAX(MBS_GRD_CD) FROM RECOM WHERE RNUM = 3) AS RECOM_MBRSH_3
+	FROM 
+	RECOM
+	WHERE ROWNUM=1
+</select>
+
+</mapper>

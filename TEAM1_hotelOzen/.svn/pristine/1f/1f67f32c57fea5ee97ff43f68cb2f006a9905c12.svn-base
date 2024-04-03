@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.DclzMapper">
+	
+	<sql id="searchFrag">
+		<trim prefix="AND" suffixOverrides="AND">
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)">
+				WORK_TYPE_CD LIKE '${paging.simpleCondition.searchWord}'
+			</if>
+		</trim>
+	</sql>
+
+	<select id="selectTotalRecord" >
+		SELECT COUNT(*)
+		FROM TB_DCLZ
+		WHERE EMP_NO = #{empNo}
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectList" parameterType="string" resultType="DclzVO">
+		WITH RNUMROOM AS(
+			SELECT
+				ROWNUM RNUM, A.*
+			FROM(
+				SELECT 
+					DCLZ_YMD
+					, DCLZ_BGN_DT
+					, DCLZ_END_DT
+					, WORK_TYPE_CD
+					, DECODE(DCLZ_STTS
+						, 'O', '출근'
+						, 'SL', '병가'
+						, 'VA', '연차'
+						, 'AB', '무단결근'
+						, 'X', '휴일'
+					) AS DCLZ_STTS
+				FROM TB_DCLZ
+				WHERE EMP_NO = #{empNo}
+				<include refid="searchFrag" />
+				ORDER BY DCLZ_YMD DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMROOM
+		<![CDATA[
+			WHERE RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+		]]>
+	</select>
+</mapper>

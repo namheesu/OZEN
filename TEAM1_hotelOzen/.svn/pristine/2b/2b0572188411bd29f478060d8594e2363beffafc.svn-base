@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpMapper">
+
+	<resultMap type="EmpVO" id="empMap" autoMapping="true">
+		<id property="empNo" column="EMP_NO"/>
+		<collection property="userRoles" ofType="string">
+			<result column="USER_ROLE"/>
+		</collection>
+	</resultMap>
+	
+	<update id="changePwd" parameterType="EmpVO">
+		UPDATE TB_EMP
+		SET EMP_PW = #{empPw}
+		WHERE EMP_NO = #{empNo}
+	</update>
+	
+	<select id="select" parameterType="string" resultType="EmpVO">
+		SELECT 
+			EMP_NO
+			, EMP_NM
+			, EMP_TEL
+			, EMP_DEPT
+			, DECODE(
+				EMP_DEPT
+				, 'FMT', '시설 관리부'
+				, 'HKP', '객실 관리부'
+				, 'FTO', '프론트 오피스부'
+				, 'HRM', '인사 관리부'
+				, 'POS', '재무부'
+				, 'CRM', '고객 관리부'
+			) AS EMP_DEPT_NAME
+			, DECODE(
+				EMP_JBGD
+				, 'STF', '직원'
+				, 'DPM', '부장'
+			) AS EMP_JBGD
+			, EMP_JNCMP_YMD
+			, EMP_HOME_TEL
+			, EMP_EML
+			, EMP_ADDR
+			, EMP_RTRM_YN
+			, EMP_PROFL_NM
+			, EMP_PROFL_UUID
+			, EMP_ANNUAL_LEAVE
+			, EMP_BIRTH
+			, EXTRACT (YEAR FROM SYSDATE) - EXTRACT (YEAR FROM TB_EMP.EMP_JNCMP_YMD) +1 AS EMP_CAREER
+		FROM TB_EMP
+		WHERE EMP_NO = #{empNo}
+	</select>
+	
+	<select id="selectList" resultType="EmpVO">
+		SELECT *
+		FROM TB_EMP
+	</select>
+	
+	<select id="selectEmpByUserName" parameterType="string" resultMap="empMap">
+		SELECT EMP_NO, EMP_NM, EMP_PW, USER_ROLE
+		FROM TB_EMP
+		WHERE EMP_NO = #{empNo}
+		UNION
+		SELECT EMP_NO, EMP_NM, EMP_PW, 'ROLE_' || EMP_DEPT
+		FROM TB_EMP
+		WHERE EMP_NO = #{empNo}
+		UNION
+		SELECT EMP_NO, EMP_NM, EMP_PW, 'ROLE_' ||emp_JBGD
+		FROM TB_EMP
+		WHERE EMP_NO = #{empNo}
+		
+	</select>
+	<select id="selectEmpDeptAndAnnual" parameterType="string" resultType="EmpVO">
+		SELECT 
+			EMP_NO
+			, EMP_DEPT
+			, EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM EMP_JNCMP_YMD) +1 AS EMP_ANNUAL
+		FROM TB_EMP
+		WHERE EMP_NO = #{empNo}
+	</select>
+	<update id="update" parameterType="EmpVO">
+		UPDATE TB_EMP
+		SET 
+			EMP_TEL = #{empTel}
+			, EMP_EML = #{empEml}
+			, EMP_HOME_TEL = #{empHomeTel}
+		<if test="empProflNm neq null">
+			, EMP_PROFL_NM = #{empProflNm}
+			, EMP_PROFL_UUID = #{empProflUuid}
+		</if>
+		WHERE
+			EMP_NO = #{empNo}
+	</update>
+	<select id="findEmpUser" parameterType="EmpVO" resultType="EmpVO">
+		SELECT 
+			EMP_NO
+			, EMP_NM
+			, EMP_TEL
+		FROM TB_EMP
+		WHERE 
+			EMP_NM = #{empNm}
+		AND EMP_TEL = #{empTel}
+		<if test="empNo neq null">
+			AND EMP_NO = #{empNo}
+		</if>
+	</select>
+	
+	<update id="deleteProfl">
+		UPDATE TB_EMP
+		SET EMP_PROFL_UUID = NULL
+		    , EMP_PROFL_NM = NULL
+		WHERE EMP_NO = #{empNo}
+	</update>
+	
+	<select id="loginEmpVOs" resultType="EmpVO">
+		SELECT 
+			EMP_NO
+			, DECODE(EMP_DEPT
+				, 'FTO' , '프론트'
+				, 'HKP' , '객실 관리부'
+				, 'FMT' , '시설 관리부'
+				, 'CRM' , '고객 관리부'
+				, 'POS' , '재무부'
+				, 'HRM' , '인사부'
+				) AS EMP_DEPT
+			, EMP_JBGD
+		FROM TB_EMP 
+		WHERE 
+		    EMP_DEPT IN ('FMT', 'FTO', 'HRM', 'POS', 'CRM', 'HKP') 
+		    AND EMP_JBGD = 'DPM'
+		UNION
+		SELECT 
+			EMP_NO
+			, DECODE(EMP_DEPT
+				, 'FTO' , '프론트'
+				, 'HKP' , '객실 관리부'
+				, 'FMT' , '시설 관리부'
+				, 'CRM' , '고객 관리부'
+				, 'POS' , '재무부'
+				, 'HRM' , '인사부'
+				) AS EMP_DEPT
+			, EMP_JBGD
+		FROM TB_EMP
+		WHERE
+			EMP_NO = 'E230014'
+	</select>
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.7.xsd">
+
+	<beans:bean
+		class="org.springframework.security.crypto.password.NoOpPasswordEncoder"
+		id="passwordEncoder"></beans:bean>
+	<beans:bean 
+		id="authenticationSuccessHandler" 
+		class="kr.or.ddit.global.security.handler.CustomAuthenticationSuccessHandler" 
+		p:defaultTargetUrl="/"
+		p:alwaysUseDefaultTargetUrl="false"
+	/>
+	
+	<beans:bean 
+		id="logoutSuccessHandler"
+		class="kr.or.ddit.global.security.handler.CustomLogoutSuccesstHandler"
+		p:defaultTargetUrl="/"
+	/>
+	
+	<authentication-manager id="mberManager" erase-credentials="false">
+		<authentication-provider
+			user-service-ref="mberDetailService"
+		>
+			<password-encoder ref="passwordEncoder"/>
+		</authentication-provider>
+	</authentication-manager>
+	
+	<authentication-manager id="empManager" erase-credentials="false">
+		<authentication-provider
+			user-service-ref="empDetailService"
+		>
+			<password-encoder ref="passwordEncoder"/>
+		</authentication-provider>
+	</authentication-manager>
+	
+	<http pattern="/resources/**" security="none"/>
+	
+	<http pattern="/emp/**" auto-config="true" authentication-manager-ref="empManager">
+		<form-login
+			login-page="/emp/auth/Login.do"
+			login-processing-url="/emp/auth/Login.do"
+			authentication-success-handler-ref="authenticationSuccessHandler"
+		/>
+		<logout
+			logout-url="/emp/logout"
+			invalidate-session="true"
+			logout-success-url="/emp/auth/Login.do"
+		/>		
+		<csrf disabled="true"/>
+		<intercept-url pattern="/emp/auth/**" access="permitAll"/>
+		<intercept-url pattern="/emp/hrm/**" access="hasRole('ROLE_HRM')"/>
+		<intercept-url pattern="/emp/pms/fxtrs/*" access="hasAnyRole('ROLE_POS', 'ROLE_HKP')"/>
+		<intercept-url pattern="/emp/pms/**" access="hasAnyRole('ROLE_FTO', 'ROLE_HKP', 'ROLE_FMT')"/>
+		<intercept-url pattern="/emp/pos/**" access="hasRole('ROLE_POS')"/>
+		<intercept-url pattern="/emp/**" access="hasRole('ROLE_EMP')"/>
+	</http>
+	
+	<http auto-config="true" authentication-manager-ref="mberManager">
+		<form-login
+			login-page="/auth/Login.do"
+			login-processing-url="/auth/Login.do"
+			authentication-success-handler-ref="authenticationSuccessHandler"
+		/>
+		<logout
+			logout-url="/logout"
+			invalidate-session="true"
+			logout-success-url="/"
+		/>
+		<csrf disabled="true"/>
+		
+		<intercept-url pattern="/auth/**" access="permitAll"/>
+		<intercept-url pattern="/myinfo/**" access="hasRole('ROLE_USER')"/>
+		<intercept-url pattern="/recom/**" access="hasRole('ROLE_USER')"/>
+	</http>
+</beans:beans>
+

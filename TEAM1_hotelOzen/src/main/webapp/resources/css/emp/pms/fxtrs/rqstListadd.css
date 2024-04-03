@@ -1,0 +1,47 @@
+.custom-table{
+	width: 20%;
+	border-color: #cccccc
+}
+
+.custom-table tbody tr:first-child {
+    height: 90px; /* 원하는 높이 값으로 변경하세요 */
+    vertical-align: middle; /* 텍스트를 수직 가운데로 정렬합니다 */
+    
+}
+
+.custom-table td,
+.custom-table th {
+    white-space: nowrap; /* 텍스트가 줄 바꿈되지 않도록 설정 */
+}
+
+.custom-thead-bg{
+	background-color : #efefef;
+}
+
+.custom-th-bg  tr th{
+	background-color : #efefef;
+}
+
+.custom-body-table-bd{
+	border-color: #cccccc;
+	border-top: 3px solid #aaaaaa;
+
+}
+
+.custom-body-td-size {
+    table-layout: fixed; /* 고정된 테이블 레이아웃을 사용합니다. */
+    width: 100%; /* 테이블의 전체 너비를 100%로 설정합니다. */
+    border-color: #cccccc
+}
+
+.custom-body-td-size td {
+    width: 25%; /* 각 셀(`<td>`)의 너비를 25%로 설정합니다. */
+}
+
+.inpWidth{
+	width:50px;
+}
+
+.text-colr-ccc{
+	color : #ccc !important
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpNoticeAtcMapper">
+
+<insert id="insertAtc" parameterType="AtchmnflEmpNoticeVO">
+	<selectKey order="BEFORE" keyProperty="attNo" resultType="int">
+		SELECT NVL(MAX(ATT_NO), 0)+1
+		FROM TB_ATCHMNFL_EMP_NOTICE
+	</selectKey>
+	INSERT INTO TB_ATCHMNFL_EMP_NOTICE(
+		ATT_NO
+		, EMP_NT_NO
+		, ATC_EMP_NT_UUID
+		, ATC_EMP_FILE_NM
+	)VALUES(
+		#{attNo, jdbcType=NUMERIC}
+		, #{empNtNo, jdbcType=VARCHAR}
+		, #{atcEmpNtUuid, jdbcType=VARCHAR}
+		, #{atcEmpFileNm, jdbcType=VARCHAR}
+		
+	)			
+</insert>
+
+<select id="selectAtc" parameterType="int" resultType="AtchmnflEmpNoticeVO">
+	SELECT
+		ATT_NO, EMP_NT_NO, ATC_EMP_NT_UUID, ATC_EMP_FILE_NM
+	FROM TB_ATCHMNFL_EMP_NOTICE
+	WHERE ATT_NO = #{attNo}
+</select>
+
+<delete id="deleteAtc">
+	DELETE FROM TB_ATCHMNFL_EMP_NOTICE
+	WHERE ATT_NO = #{attNo}
+</delete>
+
+
+</mapper>

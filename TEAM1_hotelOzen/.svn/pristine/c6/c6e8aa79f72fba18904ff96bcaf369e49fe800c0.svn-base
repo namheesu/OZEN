@@ -1,0 +1,33 @@
+.custom-thead-bg{
+	background-color : #efefef;
+}
+
+.custom-th-bg  tr th{
+	background-color : #efefef;
+}
+
+.custom-body-table-bd{
+	border-color: #cccccc;
+	border-top: 3px solid #aaaaaa;
+
+}
+
+.custom-body-td-size2 td {
+    width: 50%; 
+}
+
+.custom-body-td-size3 td {
+    width: 33%; 
+}
+
+.custom-body-td-size4 td {
+    width: 25%; /* 각 셀(`<td>`)의 너비를 25%로 설정합니다. */
+}
+
+.custom-modal-div-pd{
+	padding-left:15px;
+}
+
+.custom-modal-row-pd{
+	padding: 7px;
+}

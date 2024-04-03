@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpSchdlMapper">
+
+	<select id="empSchdlList" parameterType="string" resultType="EmpSchdlVO">
+		SELECT 
+		    EMP_NO
+		    , SCHDL_TITLE
+		    , SCHDL_START
+		    , SCHDL_END
+		    , BG_COLOR
+		FROM TB_EMP_SCHDL
+		WHERE EMP_NO = #{empNo}
+	</select>
+
+	<insert id="insertEmpSchdl" parameterType="EmpSchdlVO">
+		INSERT INTO 
+			TB_EMP_SCHDL (
+			    EMPSCHDL_NO
+			    , EMP_NO
+			    , SCHDL_TITLE
+			    , SCHDL_START
+			    , SCHDL_END
+			    , BG_COLOR
+			) VALUES (
+			    EMPSCHDL_SEQ.NEXTVAL
+			    , #{empNo}
+			    , #{schdlTitle}
+			    , #{schdlStart}
+			    , #{schdlEnd}
+			    , #{bgColor}
+			)
+	</insert>
+	
+	<delete id="deleteEmpSchdl" parameterType="EmpSchdlVO">
+		DELETE FROM
+		TB_EMP_SCHDL
+		WHERE EMP_NO =#{empNo} AND SCHDL_TITLE = #{schdlTitle}
+	</delete>
+</mapper>

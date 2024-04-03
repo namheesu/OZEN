@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.CstmrMapper">
+
+	<insert id="insertCstmr" parameterType="RegistVO">
+		INSERT INTO TB_CSTMR (
+		    CST_NO
+		    , CST_CLSFC_CD
+		    , CST_NM
+		    , CST_HP
+		    , CST_BIRTH
+		    , CST_GEN
+		    , CST_MAIL
+		) VALUES (
+		    #{cstNo}
+		  , #{cstClsfcCd}
+		  , #{cstNm}
+		  , #{cstHp}
+		  , #{cstBirth}
+		  , #{cstGen}
+		  , #{cstMail}
+		)
+	</insert>
+	<resultMap type="CstmrVO" id="cstmrMap" autoMapping="true">
+		<id property="cstNo" column="CST_NO"/>
+		<association property="mber" javaType="MberVO" autoMapping="true">
+			<result property="mberId" column="MBER_ID"/>
+		</association>
+	</resultMap>
+
+	<select id="checkUser" parameterType="CstmrVO" resultMap="cstmrMap">
+		SELECT
+			CST_NO
+			, CST_NM
+			, CST_HP
+			, MBER_ID				
+		FROM TB_CSTMR
+			INNER JOIN TB_MBER USING (CST_NO)
+		WHERE CST_CLSFC_CD = 'M'
+			AND CST_NM = #{cstNm}
+			AND CST_HP = #{cstHp}
+			<if test="mber neq null">
+				AND MBER_ID = #{mber.mberId}
+			</if>
+	</select>
+</mapper>

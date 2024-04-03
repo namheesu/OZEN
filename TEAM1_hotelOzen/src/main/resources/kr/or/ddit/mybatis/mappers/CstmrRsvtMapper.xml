@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.CstmrRsvtMapper">
+
+	<select id="select" resultType="CstmrVO" parameterType="String">
+		SELECT
+			CST_NO
+			, CST_NM
+			, CST_BIRTH
+			, FLOOR(((2000 - EXTRACT(YEAR FROM CST_BIRTH)
+			+ TO_CHAR(SYSDATE, 'YY'))
+			+ 1)/10) AS AGE
+		FROM
+			TB_CSTMR
+		WHERE
+			CST_NO = #{cstNo}
+	</select>
+
+	<resultMap type="RecomRoomVO" id="RcRmMap">
+		<id property="rermAge" column="RERM_AGE" />
+	</resultMap>
+
+	<select id="selectRcRm" parameterType="RecomRoomVO"
+		resultMap="RcRmMap">
+		SELECT
+			RERM_RMTYPE
+			, RERM_RANK
+		FROM
+			TB_RECOM_RM
+		WHERE
+			RERM_AGE = #{age} AND RERM_NMPR = #{totalNmpr}
+	</select>
+
+	<resultMap id="attatchRmTypeMap" type="AttatchRmTypeVO" autoMapping="true">
+		<id property="attNo" column="ATT_NO" />
+		<collection property="rmtype" ofType="RoomTypeVO" autoMapping="true">
+			<result property="rmtTypeCd" column="RMT_TYPE_CD" />
+		</collection>
+	</resultMap>
+
+	<select id="selectRmt" resultMap="attatchRmTypeMap"
+		parameterType="String">
+		SELECT
+			ATT_NO
+			, RMT_TYPE_CD
+			, ATT_RMT_FILENAME_01
+			, ATT_RMT_FILENAME_02
+			, ATT_RMT_FILENAME_03
+			, ATT_RMT_FILENAME_04
+			, RMT_NM
+			, RMT_NM_DETAILS
+			, RMT_BED_TYPE
+			, RMT_BED_CNT
+			, RMT_MAXNBR_CNT
+			, RMT_CHKIN_TIME
+			, RMT_CHKOUT_TIME
+			, RMT_AMNT
+		FROM
+			TB_ATTATCH_ROOM_TYPE
+			INNER JOIN TB_ROOM_TYPE
+			USING(RMT_TYPE_CD)
+		WHERE
+			RMT_TYPE_CD = #{rmType}
+	</select>
+
+
+	<select id="selectRsvtRmt" parameterType="RsvtVO" resultType="RoomTypeVO">
+		 <![CDATA[
+	SELECT 
+	    ROOM.RMT_TYPE_CD,
+	    (
+	        COUNT(*) -
+	            (
+	                SELECT COUNT(*)
+	                FROM TB_RSVT_DETAILS 
+	                INNER JOIN TB_RSVT USING(RSVT_NO) 
+	                WHERE #{rsvtCheckinYmd} >= RSVT_CHECKIN_YMD 
+	                AND #{rsvtCheckoutYmd} <= RSVT_CHECKOUT_YMD
+	                AND TB_RSVT_DETAILS.RMT_TYPE_CD = ROOM.RMT_TYPE_CD
+	            ) 
+	            +
+	            (
+	                SELECT COUNT(*)
+	                FROM TB_CHKIN 
+	                INNER JOIN TB_ROOM USING(RM_NO)
+	                WHERE #{rsvtCheckinYmd} between CI_DT AND CI_COWILL_YMD
+	                AND CI_SE_CD = 'W'
+	                AND TB_ROOM.RMT_TYPE_CD = ROOM.RMT_TYPE_CD
+	            )
+	    ) AS TOTAL_COUNT
+	FROM 
+	    TB_ROOM ROOM 
+	INNER JOIN 
+	    TB_ROOM_TYPE TYPE ON ROOM.RMT_TYPE_CD = TYPE.RMT_TYPE_CD
+	WHERE 
+	    TYPE.RMT_MAXNBR_CNT >= #{rsvtMaxNberCnt}
+	GROUP BY 
+	    ROOM.RMT_TYPE_CD
+	HAVING 
+	    (
+	        COUNT(*) -
+	            (
+	                SELECT COUNT(*)
+	                FROM TB_RSVT_DETAILS 
+	                INNER JOIN TB_RSVT USING(RSVT_NO) 
+	                WHERE #{rsvtCheckinYmd} >= RSVT_CHECKIN_YMD 
+	                AND #{rsvtCheckoutYmd} <= RSVT_CHECKOUT_YMD
+	                AND TB_RSVT_DETAILS.RMT_TYPE_CD = ROOM.RMT_TYPE_CD
+	            ) 
+	            +
+	            (
+	                SELECT COUNT(*)
+	                FROM TB_CHKIN 
+	                INNER JOIN TB_ROOM USING(RM_NO)
+	                WHERE #{rsvtCheckinYmd} between CI_DT AND CI_COWILL_YMD
+	                AND CI_SE_CD = 'W'
+	                AND TB_ROOM.RMT_TYPE_CD = ROOM.RMT_TYPE_CD
+	            )
+	    ) >= #{rsvtRoomCnt}
+		 ]]>
+	</select>
+
+	<insert id="insertSetle" parameterType="SetleVO">
+		INSERT INTO TB_SETLE (
+			SETLE_NO
+			, CST_NO
+			, SETLE_YMD
+			, SETLE_AMNT
+			, SETLE_STTUS_CD
+			, SETLE_CARD_NM
+			, SETLE_CARD_NUMBER
+			, SETLE_IMP_UID
+			, SETLE_MERCHANT_UID
+			, SETLE_PAY_METHOD
+			, SETLE_ADD
+			)
+		VALUES(
+			#{setleNo,jdbcType=VARCHAR}
+			, #{cstNo,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{setleAmnt,jdbcType=NUMERIC}
+			, 'Y'
+			, #{setleCardNm,jdbcType=VARCHAR}
+			, #{setleCardNumber,jdbcType=VARCHAR}
+			, #{setleImpUid,jdbcType=VARCHAR}
+			, #{setleMerchantUid,jdbcType=VARCHAR}
+			, #{setlePayMethod,jdbcType=VARCHAR}
+			, 'CPRO'
+
+		)
+	</insert>
+	<insert id="insertRsvt" parameterType="RsvtVO">
+		INSERT INTO TB_RSVT(
+			RSVT_NO
+			, CST_NO
+			, RSVT_YMD
+			, RSVT_AMNT
+			, RSVT_CNCL_YN
+			, RSVT_CHECKIN_YMD
+			, RSVT_CHECKOUT_YMD
+			, RSVT_ROOM_CNT
+			, RSVT_ADULT_CNT
+			, RSVT_CHILD_CNT
+			, RSVT_SETLE_NO
+		) VALUES(
+			#{rsvtNo,jdbcType=VARCHAR}
+			, #{cstNo,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{rsvtAmnt,jdbcType=NUMERIC}
+			, 'N'
+			, #{rsvtCheckinYmd,jdbcType=DATE}
+			, #{rsvtCheckoutYmd,jdbcType=DATE}
+			, #{rsvtRoomCnt,jdbcType=NUMERIC}
+			, #{rsvtAdultCnt,jdbcType=NUMERIC}
+			, #{rsvtChildCnt,jdbcType=NUMERIC}
+			, #{rsvtSetleNo,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertRsvtDetails" parameterType="RsvtDetailsVO">
+		INSERT INTO TB_RSVT_DETAILS(
+			RSVT_NO
+			, RSVT_DTL_NMPR_CNT
+			, RSVT_DTL_ADULT_CNT
+			, RSVT_DTL_CHILD_CNT
+			, RSVT_SE
+			, RMT_TYPE_CD
+			, RSVT_DTL_NO
+			, RSVT_DTL_AMNT
+			) VALUES(
+		#{rsvtNo,jdbcType=VARCHAR}
+		, #{rsvtDtlNmprCnt,jdbcType=NUMERIC}
+		, #{rsvtDtlAdultCnt,jdbcType=NUMERIC}
+		, #{rsvtDtlChildCnt,jdbcType=NUMERIC}
+		, '예약중'
+		, #{rmtTypeCd,jdbcType=VARCHAR}
+		, #{rsvtDtlNo,jdbcType=VARCHAR}
+		, #{rsvtDtlAmnt,jdbcType=NUMERIC}
+			)
+	</insert>
+	<insert id="insertNber" parameterType="CstmrVO">
+		INSERT INTO TB_CSTMR(
+			CST_NO
+			, CST_CLSFC_CD
+			, CST_NM
+			, CST_HP
+			, CST_BIRTH
+			, CST_GEN
+			, CST_MAIL
+		) VALUES(
+			#{cstNo,jdbcType=VARCHAR}
+			,'N'
+			, #{cstNm,jdbcType=VARCHAR}
+			, #{cstHp,jdbcType=VARCHAR}
+			, #{cstBirth,jdbcType=DATE}
+			, #{cstGen,jdbcType=VARCHAR}
+			, #{cstMail,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="selectNewNberCstNo" resultType="string">
+		    SELECT
+				CASE
+				WHEN COUNT(*) > 0 THEN 'N' ||
+					SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) ||
+					LPAD(max(SUBSTR((cst_no), -5)) +1 , 5, '0')
+				ELSE
+					'M' || SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) || 
+					LPAD('1', 5, '0')
+				END 
+					AS result
+				FROM tb_cstmr
+				WHERE
+					SUBSTR(cst_no, 2, 2) LIKE
+					SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2)
+	</select>
+	<select id="selectNewSelteNo" resultType="string">
+			SELECT
+				CASE
+				WHEN COUNT(*) > 0 THEN 'CPRO' ||
+					TO_CHAR(SYSDATE, 'YYMM')||
+					LPAD(MAX(SUBSTR((SETLE_NO), -4)) +1, 4, '0')
+				ELSE
+					'CPRO' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
+				END
+				FROM TB_SETLE
+				WHERE
+					SUBSTR(SETLE_NO, 5,4) LIKE TO_CHAR(SYSDATE, 'YYMM')
+					AND SUBSTR(SETLE_NO, 1, 4) LIKE 'CPRO'
+	</select>
+	<select id="selectNewRsvtNo" resultType="string">
+			SELECT
+				CASE
+				WHEN COUNT(*) > 0 THEN 'RSV' || TO_CHAR(SYSDATE, 'YYMM') ||
+					LPAD(MAX(SUBSTR((RSVT_NO), -4)) + 1, 4, '0')
+				ELSE
+					'RSV' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
+				END
+				FROM TB_RSVT
+				WHERE
+					SUBSTR(RSVT_NO, 4, 4) LIKE TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+	<select id="selectRsvtDetailNo" resultType="string">
+			SELECT
+		    CASE
+		        WHEN COUNT(*) > 0 THEN 'DRSV' || TO_CHAR(SYSDATE,'YYMM') || LPAD(MAX(SUBSTR((RSVT_DTL_NO), -2, 4)) +1 , 4, '0')
+		    ELSE
+		        'DRSV' || TO_CHAR(SYSDATE,'YYMM') || LPAD('1', 4, '0')
+		    END
+		    FROM TB_RSVT_DETAILS
+		    WHERE
+		        SUBSTR(RSVT_DTL_NO, 5, 4) LIKE TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+	
+	<resultMap type="CouponIsnVO" id="couponMap" autoMapping="true">
+		<collection property="couponVO" ofType="CouponVO" autoMapping="true">
+			<result property="cpnNo" column="CPN_NO"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectCouponIsn" parameterType="map" resultMap="couponMap">
+		SELECT
+			CPN_NO
+			, CST_NO
+			, CPNK_NO
+			, CPN_AVAIL_YN
+			, CPN_USE_YMD
+			, CPNK_NM
+			, CPN_USE
+			, CPN_DSCNT_PRICE
+		FROM
+			TB_COUPON_ISN INNER JOIN TB_COUPON USING (CPNK_NO)
+		WHERE
+			CPN_AVAIL_YN = 'Y'
+			AND CPN_EXPRT_YMD <![CDATA[ >= ]]> SYSDATE
+            AND (CPN_USE = '객실'
+            OR (CPNK_NM LIKE '%' || #{roomTypeNm} || '%' AND CPN_USE = '숙박권'))
+            AND CST_NO = #{cstNo}
+            ORDER BY CPNK_NM DESC
+	</select>
+	
+	<update id="updateCouponIsn" parameterType="CouponIsnVO">
+		UPDATE TB_COUPON_ISN
+		SET
+			CPN_AVAIL_YN = 'U'
+			, CPN_USE_YMD = SYSDATE
+		WHERE
+			CPN_NO = #{cpnNo}
+			AND CST_NO = #{cstNo}
+	</update>
+	
+</mapper>

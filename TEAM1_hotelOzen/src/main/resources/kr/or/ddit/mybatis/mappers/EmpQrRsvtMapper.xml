@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpQrRsvtMapper">
+
+	<resultMap type="RsvtDetailsVO" id="rsvtDtlListMap" autoMapping="true">
+		<id property="rsvtDtlNo" column="RSVT_DTL_NO"/>
+		<association property="rsvt" javaType="RsvtVO" autoMapping="true">
+			<id property="rsvtNo" column="RSVT_NO"/>
+		</association>
+	</resultMap>
+
+	<select id="selectRsvtDtlList" resultMap="rsvtDtlListMap" parameterType="String">
+		SELECT 	
+			RSVT_DTL_NO
+			, RSVT_NO
+			, RSVT_SE
+		FROM 
+		    TB_RSVT_DETAILS
+		    INNER JOIN TB_RSVT USING (RSVT_NO)
+		WHERE
+		    RSVT_NO = #{rsvtNo}
+	</select>
+	
+</mapper>

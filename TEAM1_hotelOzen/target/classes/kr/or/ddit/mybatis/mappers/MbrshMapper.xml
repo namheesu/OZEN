@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.MbrshMapper">
+	
+	<select id="selectDetail" resultType="MbrshGrdVO">
+		
+	</select>
+	<select id="selectList" resultType="MbrshGrdVO">
+		SELECT 
+			* 
+		FROM
+			(SELECT 
+			    MBS_GRD_CD
+			    , SUBSTR(MBS_GRD_CD, 2) AS MBS_GRD_NM
+			    , MBS_GRD_AMNT
+			    , MBS_GRD_PRK
+			FROM TB_MBRSH_GRD
+			WHERE MBS_GRD_CD LIKE 'L%')
+			INNER JOIN 
+			(SELECT 
+			    MBS_GRD_CD
+			    , ACCOM_COUPON_CNT
+			    , TB_COUPON.CPNK_NM AS ACCOM_COUPON
+			FROM 
+			(SELECT 
+			    MBS_GRD_CD
+			    , SUM(CPN_PRV_CNT) AS ACCOM_COUPON_CNT
+			    , MAX(CPNK_NO) AS MAX_CPNK_NO
+			FROM TB_MBRSH_BNF INNER JOIN TB_COUPON USING (CPNK_NO)
+			WHERE CPN_USE = '숙박권'
+			AND MBS_GRD_CD LIKE 'L%'
+			GROUP BY MBS_GRD_CD
+			),TB_COUPON
+			WHERE CPNK_NO = MAX_CPNK_NO) USING (MBS_GRD_CD)
+			ORDER BY 
+			CASE 
+			    WHEN MBS_GRD_CD LIKE '%BLUE' THEN 1
+			    WHEN MBS_GRD_CD LIKE '%GREEN' THEN 2
+			    WHEN MBS_GRD_CD LIKE '%RED' THEN 3
+			    WHEN MBS_GRD_CD LIKE '%BLACK' THEN 4
+		END
+	</select>
+	
+	<select id="selectBenefit" resultType="MbrshGrdVO">
+		SELECT 
+		    *
+		FROM (
+		    SELECT 
+		        MBS_GRD_CD
+		        , MBS_GRD_AMNT
+		        , MBS_GRD_PRK
+		        , CPNK_NM AS ACCOM_COUPON
+		        , CPN_USE
+		        , CPN_PRV_CNT AS ACCOM_COUPON_CNT
+		    FROM TB_MBRSH_BNF 
+		        INNER JOIN TB_MBRSH_GRD USING (MBS_GRD_CD)
+		        INNER JOIN TB_COUPON USING (CPNK_NO)
+		    WHERE MBS_GRD_CD LIKE '%'||#{grd}
+		    AND CPN_USE = '숙박권')
+		    INNER JOIN (
+		        SELECT
+		            MBS_GRD_CD
+		            , SUM(CPN_PRV_CNT*CPN_DSCNT_PRICE) AS DISCOUNT
+		            , SUM(CPN_PRV_CNT) AS TOTAL_COUPON 
+		        FROM TB_MBRSH_BNF INNER JOIN TB_COUPON USING (CPNK_NO)
+		        GROUP BY MBS_GRD_CD
+		    ) USING (MBS_GRD_CD)
+		WHERE MBS_GRD_CD LIKE '%'||#{grd}
+		ORDER BY 
+		CASE 
+		    WHEN MBS_GRD_CD LIKE 'B%' THEN 1
+		    WHEN MBS_GRD_CD LIKE 'L%' THEN 2
+		    WHEN MBS_GRD_CD LIKE 'D%' THEN 3
+		    ELSE 4
+		END
+	</select>
+	
+	<resultMap type="MbrshGrdVO" id="mbrshGrdOne" autoMapping="true">
+		<id property="mbsGrdCd" column="MBS_GRD_CD"/>
+		<collection property="couponList" javaType="list" ofType="CouponVO" autoMapping="true"/>
+	</resultMap>
+	
+	<select id="selectOne" resultMap="mbrshGrdOne">
+		SELECT 
+            MBS_GRD_CD
+            , MBS_GRD_NM
+            , MBS_GRD_AMNT
+            , MBS_GRD_PRK
+            , CPNK_NO
+            , CPN_PRV_CNT
+            , CPNK_NM
+            , CPN_USE
+            , CPN_DSCNT_PRICE
+        FROM TB_MBRSH_GRD 
+            INNER JOIN tb_mbrsh_bnf USING (MBS_GRD_CD)
+            INNER JOIN TB_COUPON USING (CPNK_NO)
+        WHERE MBS_GRD_CD = #{grd}
+	</select>
+	
+	<select id="selectCouponList">
+		<![CDATA[
+		WITH CPN_PRV_CNT_RECURSIVE (MBS_GRD_CD, CPNK_NO, CPN_PRV_CNT, iteration) AS (
+		    SELECT MBS_GRD_CD, CPNK_NO, CPN_PRV_CNT, 1 AS iteration
+		    FROM TB_MBRSH_BNF
+		    WHERE MBS_GRD_CD = #{grd}
+		    UNION ALL
+		    SELECT MBS_GRD_CD, CPNK_NO, CPN_PRV_CNT, iteration + 1
+		    FROM CPN_PRV_CNT_RECURSIVE
+		    WHERE iteration < CPN_PRV_CNT
+		)
+		SELECT MBS_GRD_CD, CPNK_NO, CPN_PRV_CNT
+		FROM CPN_PRV_CNT_RECURSIVE
+		]]>
+	</select>
+	
+	<select id="selectMbrshList" resultType="MbrshGrdVO">
+		SELECT
+		    MBS_GRD_CD
+		    , MBS_GRD_NM
+		FROM TB_MBRSH_GRD
+	</select>
+	
+	<select id="selectUserMbershList">
+		SELECT 
+		    CST_NO
+		    , MBS_GRD_CD
+		    , MBS_SBSCRB_YMD
+		    , MBS_EXPRT_YMD
+		    , MBS_SETLE_AMNT
+		FROM TB_MBRSH_SETLE
+		WHERE CST_NO = #{cstNo}
+		ORDER BY MBS_SBSCRB_YMD DESC
+	</select>
+	
+	<select id="selectMbrshCountList">
+		SELECT 
+		    COUNT(*) TOTAL_MBER
+		    , SUM(
+		        CASE 
+		            WHEN MBS_GRD_CD IS NULL THEN 1 ELSE 0 
+		        END) AS NON_MBS_MBER
+		    , SUM(
+		        CASE 
+		            WHEN MBS_GRD_CD IS NOT NULL THEN 1 ELSE 0 
+		        END) AS MBS_MBER
+		FROM TB_MBER
+		LEFT OUTER JOIN TB_MBRSH_SETLE USING (CST_NO)
+	</select>
+</mapper>

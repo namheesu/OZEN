@@ -1,0 +1,45 @@
+@charset "UTF-8";
+
+ .calen-body {
+ 	background-color : white;
+ }
+ 
+ 
+/* 캘린더 input태그 */
+input[type='date']::before {
+  content: attr(data-placeholder);
+  width: 100%;
+}
+
+input[type='date']:focus::before,
+input[type='date']:valid::before {
+  display: none;
+}
+
+.dateInput {
+	border-color : #bcbcbc;
+	padding : 5px 5px;
+	border-radius: 10px;
+}
+
+/* 캘린더 select박스 (color) */
+.schdlColor{
+    width: 200px;
+    border: 1px solid ;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 5px 5px;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    border-color : #bcbcbc;
+}
+
+.schdlColor:focus{
+    border: 1px solid #666;
+    box-sizing: border-box;
+/*     outline: 3px solid #666; */
+    border-radius: 10px;
+}

@@ -1,0 +1,67 @@
+@charset "UTF-8";
+
+@font-face { 
+ font-family: 'NanumBarunGothic';
+ font-style: normal;
+ font-weight: 300;
+
+ src:  url('../../../resources/assets/css/nanum/NanumBarunGothicLight.woff') format('woff'), 
+ 	   url('../../../resources/assets/css/nanum/NanumBarunGothicLight.woff2') format('woff2'), 
+}
+@font-face { 
+ font-family: 'NanumBarunGothic';
+ font-style: normal;
+ font-weight: 400;
+
+ src:  url('../../../resources/assets/css/nanum/NanumBarunGothic.woff') format('woff'), 
+ 	   url('../../../resources/assets/css/nanum/NanumBarunGothic.woff2') format('woff2'), 
+}
+
+@font-face {
+ font-family: 'NanumBarunGothic';
+ font-style: normal;
+ font-weight: 700;
+ src: 
+		url('../../../resources/assets/css/nanum/NanumBarunGothicBold.woff') format('woff'), 
+		url('../../../resources/assets/css/nanum/NanumBarunGothicBold.woff2') format('woff2'), 
+}
+
+@font-face {
+ font-family: 'JungChul';
+ font-style: normal;
+ font-weight: 700;
+ src: 
+		url('../../../resources/assets/css/jungchul/KimjungchulMyungjo-Bold.woff') format('woff'), 
+		url('../../../resources/assets/css//jungchul/KimjungchulMyungjo-Bold.woff2') format('woff2'), 
+}
+@font-face {
+ font-family: 'JungChul';
+ font-style: normal;
+ font-weight: 400;
+ src: 
+		url('../../../resources/assets/css/jungchul/KimjungchulMyungjo-Light.woff') format('woff'), 
+		url('../../../resources/assets/css//jungchul/KimjungchulMyungjo-Light.woff2') format('woff2'), 
+}
+@font-face {
+ font-family: 'JungChul';
+ font-style: normal;
+ font-weight: 300;
+ src: 
+		url('../../../resources/assets/css/jungchul/KimjungchulMyungjo-Regular.woff') format('woff'), 
+		url('../../../resources/assets/css//jungchul/KimjungchulMyungjo-Regular.woff2') format('woff2'), 
+}
+
+@font-face {
+ font-family: 'Avenir';
+ font-style: normal;
+ font-weight: 700;
+ src: 
+		url('../../../resources/assets/css/Avenir/AvenirLTStd-Black.woff') format('woff'), 
+		url('../../../resources/assets/css/Avenir/AvenirLTStd-Black.woff2') format('woff2'), 
+}
+
+
+
+.nanumbarungothic * {
+  font-family: 'NanumBarunGothic', sans-serif, JungChul; 
+ } 

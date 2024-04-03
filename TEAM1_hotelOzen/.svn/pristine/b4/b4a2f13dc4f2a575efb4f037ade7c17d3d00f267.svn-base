@@ -1,0 +1,213 @@
+@charset "UTF-8";
+
+.inner {
+    position: relative;
+    width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 180px;
+}
+
+.rsvRoomWrap .titDep2 + .subTxt {
+    font-size: 18px;
+    font-family: gothamL;
+    margin-bottom: 40px;
+}
+
+.myContents .defaultTit {
+    display: inline-block;
+    color: #333;
+    font: 500 24px/1 gothamM,notokrR;
+    text-transform: uppercase;
+}
+
+.myContents .defaultInfo {
+    color: #000;
+    font-family: gothamL,notokrL;
+    vertical-align: middle;
+}
+
+p.txtGuide:before, .txtGuide li:before {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    font: 600 15px gothamL;
+}
+
+.btnLine {
+    display: inline-block;
+    line-height: 1.25;
+    font-size: 14px;
+    letter-spacing: -.01em;
+}
+
+.btnLine:after, .btnMore:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: #000;
+}
+
+.myContents h3.titDep3 {
+    margin: 76px 0 28px;
+    font: 500 28px gothamB, notokrR;
+    letter-spacing: -.025em;
+}
+
+.rsvRoomWrap .rCont {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 400px;
+}
+
+.btnLine {
+    display: inline-block;
+    line-height: 1.25;
+    font-size: 14px;
+    letter-spacing: -.01em;
+    box-sizing: border-box;
+    border: none;
+    background: none;
+}
+
+.rsvRoomWrap .rCont .rsvList > li {
+    padding: 34px 40px 28px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.rsvList > li:last-child {
+    border-bottom: 1px solid #ccc;
+}
+
+.rsvList > li {
+    padding: 21px 20px 22px;
+    border-top: 1px solid #ccc;
+}
+
+.rsvRoomWrap .rCont .listTit {
+    font-weight: 500;
+    font-size: 16px;
+    color: #989442;
+    vertical-align: top;
+}
+
+.rsvRoomWrap .rCont .listTit .price {
+    display: block;
+    color: #000;
+    font-size: 22px;
+    line-height: 1;
+    padding-bottom: 12px;
+    margin-top: -4px;
+    font-family: gothamL;
+}
+
+.rsvRoomWrap .rCont .listTit .price em {
+    display: inline-block;
+    vertical-align: -5px;
+    font-size: 36px;
+    font-family: playfair;
+    margin-right: 3px;
+    font-feature-settings: 'lnum','pnum';
+    letter-spacing: .075em;
+}
+
+.rsvRoomWrap .rCont .totalCont .totalPrice {
+    position: relative;
+    padding: 60px 0 27px;
+}
+
+.rsvRoomWrap .rCont .totalCont .totalPrice .txt {
+    font-size: 22px;
+}
+
+.rsvRoomWrap .rCont .totalCont .totalPrice .subTxt {
+    position: absolute;
+    top: 37px;
+    right: 0;
+    font-size: 18px;
+}
+
+.rsvRoomWrap .rCont .totalCont .totalPrice .price {
+    position: absolute;
+    bottom: 14px;
+    right: 0;
+    font-weight: 600;
+    font-size: 26px;
+    font-family: gothamL,notokrL;
+}
+
+.rsvRoomWrap .rCont .totalCont .totalPrice .price em {
+    display: inline-block;
+    vertical-align: -4px;
+    font-weight: 500;
+    font-size: 40px;
+    font-family: playfair;
+    margin-right: 3px;
+    font-feature-settings: 'lnum','pnum';
+    letter-spacing: -.02em;
+}
+
+.toggleList.agreeCont > li {
+    padding: 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.myContents h3.titDep3 {
+    margin: 76px 0 28px;
+    font: 500 24px gothamB, notokrR;
+    letter-spacing: -.025em;
+}
+
+.toggleList.agreeCont .frm.type02 {
+    padding: 18px 20px 19px;
+}
+
+.frm input[type=checkbox], .frm input[type=radio] {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.frm.type02 label {
+    font-size: 18px;
+    padding-left: 33px;
+}
+
+.frm label {
+    display: inline-block;
+    position: relative;
+    font-size: 17px;
+    padding-left: 35px;
+    font-family: gothamL,notokrL;
+    text-transform: uppercase;
+}
+
+.toggleList.agreeCont .btnToggle {
+    position: absolute;
+    right: 20px;
+    top: 23px;
+    width: 18px;
+    height: 20px;
+    overflow: hidden;
+    text-indent: -9999px;
+}
+
+.toggleList.agreeCont .toggleCont .toggleInner {
+    padding: 25px;
+    background: #f9f9f9;
+}
+
+.btnArea{
+	text-align:right;
+}
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}

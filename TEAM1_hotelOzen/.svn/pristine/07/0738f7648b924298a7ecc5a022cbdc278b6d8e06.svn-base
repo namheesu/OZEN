@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpFxtrsMapper">
+	<!-- 현재비품 내역 조회 쿼리 start -->
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR FX_CD LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR FX_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+	            AND FX_PRFRN LIKE '%${simpleCondition.selectOneSearchWord}%'
+	        </if>
+	    </trim>
+	</sql>
+	
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+			TB_FXTRS
+		<include refid="searchFrag" />
+	</select>
+	
+	<select id="selectList" resultType="FxtrsVO">
+		SELECT 
+		    FX_CD
+		    , FX_NM
+		    , FX_PRES_CNT
+		    , FX_TTRTN_CNT
+		    , FX_CLS_CD
+		    , FX_UNIT
+		FROM 
+		    TB_FXTRS
+		<include refid="searchFrag" />
+		ORDER BY FX_CD 
+		
+	</select>
+	<!-- 현재비품 내역 조회 쿼리 end -->	
+	
+	
+</mapper>

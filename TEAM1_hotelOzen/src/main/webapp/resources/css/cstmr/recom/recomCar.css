@@ -1,0 +1,22 @@
+@charset "UTF-8";
+
+.recom-table{
+	max-width: 800px;
+}
+.recom-div{
+	display:flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.card-header{position:relative}
+.wish-area { 
+	position:absolute; 
+	top:20px;
+	right:20px;
+	width:30px;
+	height:50px;
+}
+.bi {
+	display:inline-block;
+	font-size:25px
+}

@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+
+/* 탭 css */
+.oprTab {
+    padding: 15px 10px;
+}
+.oprTab input[type=radio]{
+    display: none;
+}
+.oprTab input[type=radio]+label{
+    display: inline-block;
+    cursor: pointer;
+    height: 30px;
+    width: 90px;
+    border: 1px solid #333;
+    line-height: 24px;
+    text-align: center;
+    font-weight:bold;
+    font-size:13px;
+}
+.oprTab input[type=radio]+label{
+    background-color: #fff;
+    color: #333;
+}
+.oprTab input[type=radio]:checked+label{
+    background-color: #333;
+    color: #fff;
+}
+.oprTxt {
+	display : flex;
+	justify-content : center;
+}

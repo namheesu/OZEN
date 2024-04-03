@@ -1,0 +1,38 @@
+@charset "UTF-8";
+
+
+
+.simplebar-wrapper{
+	margin: 0px;
+}
+
+.simplebar-offset{
+	right: 0px; bottom: 0px;
+}
+
+.simplebar-content-wrapper{
+	height: auto; overflow: hidden;
+}
+
+.simplebar-content {
+	padding: 0px;
+}
+
+
+.simplebar-placeholder {
+	width: auto; height: 50px;
+}
+
+
+
+.simplebar-track simplebar-horizontal {
+	visibility: hidden;
+}
+
+.simplebar-scrollbar {
+	width: 0px; display: none;
+}
+
+.simplebar-track simplebar-vertical {
+	visibility: hidden;
+}

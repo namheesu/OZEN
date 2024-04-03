@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+.error-body{
+	padding-top:200px;
+	padding-bottom:250px;
+	text-align:center;
+}
+
+.error-title {
+    color: white;
+    font-family: JungChul !important;
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 50px;
+    text-shadow: 2px 2px 3px gray;
+}
+
+.error-message {
+    color: white;
+    font-family: JungChul !important;
+    text-align: center;
+    font-size: 30x;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 3px gray;
+}
+
+.home-btn {
+    text-align: center;
+	color: #fff;
+}

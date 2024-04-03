@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.ScrapMapper">
+
+<resultMap type="ScrapVO" id="ScrapSbrs" autoMapping="true">
+	<collection property="sbrsVO" javaType="SbrsVO" autoMapping="true">
+		<id property="scrapNo" column="SCRAP_NO"/>
+	</collection>
+</resultMap>
+
+<parameterMap type="hashmap" id="sbrsScrapMap">
+	<parameter property="cstNo"/>
+</parameterMap>
+
+<select id="selectScrapSbrs" resultMap="ScrapSbrs" parameterMap="sbrsScrapMap" >
+	SELECT
+	    sbrs_cd
+	  , sbrs_utlzt_dt
+	  , sbrs_utlzt_date
+	  , sbrs_floor
+	  , sbrs_nm
+	  , sbrs_adult_fee
+	  , sbrs_child_fee
+	  , sbrs_detail
+	FROM
+	    tb_sbrs sbrs
+	INNER JOIN tb_scrap scrap 
+	ON(sbrs.sbrs_cd = scrap.scrap_no)
+	where scrap.cst_no = #{cstNo}
+</select>
+
+<resultMap type="ScrapVO" id="ScrapCar" autoMapping="true">
+	<collection property="carVO" javaType="CarVO" autoMapping="true">
+		<id property="scrapNo" column="SCRAP_NO"/>
+	</collection>
+</resultMap>
+
+<parameterMap type="hashmap" id="carScrapMap">
+	<parameter property="cstNo"/>
+</parameterMap>
+
+<select id="selectScrapCar" resultMap="ScrapCar" parameterMap="carScrapMap" >
+	SELECT
+	    CAR_NO
+	    , CAR_NM
+	    , CAR_LIM
+	    , CAR_KIND
+	    , CAR_AGE
+	FROM 
+	    TB_CAR car
+	INNER JOIN TB_SCRAP scrap
+	ON(CAR.CAR_NO = SCRAP.SCRAP_NO)
+	WHERE SCRAP.CST_NO = #{cstNo}
+</select>
+
+<delete id="deleteScrap" parameterType="ScrapVO">
+	DELETE
+	FROM 
+	    TB_SCRAP
+	WHERE 
+	    CST_NO = #{cstNo} AND SCRAP_NO = #{scrapNo}
+</delete>
+
+
+
+</mapper>

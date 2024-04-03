@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpAlramMapper">
+
+	<select id="selectAlram" parameterType="string">
+		SELECT 
+		    SANCTN_NO
+		    , a.EMP_NO
+		    , READ_YN
+		    , MESSAGE
+		    , RQST_YMD
+		    , RQST_SE
+		    , RQST_RQ_YMD
+		    , RQST_PURCHS_YMD
+		    , EMP_RQ_NO
+		    , EMP_PURCHS_NO
+		FROM TB_EMP_ALRAM a, TB_FXTRS_RQST b
+		WHERE a.EMP_NO = b.EMP_NO
+		AND EMP_RQ_NO = #{empRqNo}
+	</select>
+
+	<insert id="insertAlram" parameterType="EmpAlramVO">
+		
+	</insert>
+
+</mapper>

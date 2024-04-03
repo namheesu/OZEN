@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpRoomMapper">
+
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RM_AVLBL_DETAILS LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RMT_NM_DETAILS LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND RM_AVLBL_DETAILS = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectTwoSearchWord)">
+		        AND RM_CLEAN = '${simpleCondition.selectTwoSearchWord}'
+		    </if>
+		</trim>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_ROOM
+		    INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
+		<include refid="searchFrag" />
+	</select>
+	
+	<resultMap type="RoomVO" id="RoomMap" autoMapping="true">
+		<id property="rmNo" column="RM_NO"/>
+		<association property="roomType" javaType="RoomTypeVO" autoMapping="true">
+			<id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectList" resultMap="RoomMap" parameterType="PaginationInfo">
+		WITH RNUMROOM AS(
+			SELECT
+				ROWNUM RNUM, A.*
+			FROM(
+				SELECT 
+				    RM_NO
+				    , RMT_TYPE_CD
+				    , RMT_NM_DETAILS
+				    , RM_AVLBL_YN
+				    , RM_AVLBL_DETAILS
+				    , RM_CLEAN
+				FROM 
+					TB_ROOM
+					INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
+				<include refid="searchFrag" />
+				ORDER BY RM_CLEAN DESC, RM_AVLBL_DETAILS DESC, TO_NUMBER(SUBSTR(RM_NO, 2))
+			)A
+		)
+		SELECT *
+		FROM RNUMROOM
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+
+	<select id="select" resultType="RoomVO" parameterType="String">
+		SELECT 
+		    RM_NO
+		    , RMT_TYPE_CD
+		    , RM_AVLBL_YN
+		    , RM_AVLBL_DETAILS
+		    , RM_CLEAN
+		FROM 
+			TB_ROOM
+		WHERE
+			RM_NO = #{rmNo}
+	</select>
+	
+	<update id="updateRoom" parameterType="String">
+		UPDATE 
+        	TB_ROOM 
+        SET 
+        	RM_AVLBL_YN = 'Y'
+        	, RM_AVLBL_DETAILS = '빈객실'
+        	, RM_CLEAN = '완료'
+        WHERE 
+        	RM_NO = #{rmNo}
+	</update>
+	
+	<select id="selectEmptyTotal" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_ROOM
+		WHERE 
+		    RM_AVLBL_DETAILS = '빈객실'
+	</select>
+	
+	<select id="selectStayTotal" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_ROOM
+		WHERE 
+		    RM_AVLBL_DETAILS = '투숙중'
+	</select>
+	
+	<select id="selectCleanTotal" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_ROOM
+		WHERE 
+		    RM_AVLBL_DETAILS = '청소'
+	</select>
+	
+	<select id="selectBreakTotal" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_ROOM
+		WHERE 
+		    RM_AVLBL_DETAILS = '고장'
+	</select>
+</mapper>

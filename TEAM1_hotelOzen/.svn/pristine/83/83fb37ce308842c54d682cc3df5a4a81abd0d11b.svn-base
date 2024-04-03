@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+.label {
+    font-weight: 600;
+    color: #430000;
+}
+
+.rounded-circle{
+	width:120px;
+	height:120px;
+}

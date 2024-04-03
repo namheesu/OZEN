@@ -1,0 +1,43 @@
+@charset "UTF-8";
+.label-box{
+	width: 300px;
+	min-width:300px;
+	height: 90px;
+	justify-content: center;
+}
+.label-box > div {
+	margin-left: 25px;
+}
+.label-box > div > label{
+	margin-bottom: 8px;
+	color: #2F9D27;
+	font-weight: 700;
+}
+.date-box{
+	display: flex;
+    justify-content: right;
+    margin-right: 10px;
+}
+#searchDate{
+	width: 200px;
+	height: 35px;
+}
+
+input[type="date"] {
+	position : relative;
+	border: none;
+}
+input[type="date"]::-webkit-clear-button,
+input[type="date"]::-webkit-inner-spin-button{
+	display:none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+	position:absolute;
+	left:0;
+	top:0;
+	width:100%;
+	height: 100%;
+	background: transparent;
+	color: transparent;
+	cursor: pointer;
+}

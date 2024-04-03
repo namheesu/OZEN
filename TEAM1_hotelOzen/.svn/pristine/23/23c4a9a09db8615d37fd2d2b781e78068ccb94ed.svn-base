@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpStayListMapper">
+
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR CST_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR CHKIN_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		    </trim>
+		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND RSVT_SE = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+		</trim>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_CHKOUT
+		    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		<include refid="searchFrag" />
+	</select>
+
+	<resultMap type="ChkoutVO" id="stayMap" autoMapping="true">
+		<association property="chkin" javaType="ChkinVO" autoMapping="true">
+			<id property="chkinNo" column="CHKIN_NO"/>
+			<association property="room" javaType="RoomVO" autoMapping="true">
+				<id property="rmNo" column="RM_NO"/>
+			</association>
+			<association property="cstmr" javaType="CstmrVO" autoMapping="true">
+				<id property="cstNo" column="CST_NO"/>
+				<result property="cstNm" column="CST_NM"/>
+			</association>
+		</association>
+		<collection property="rmsOrder" javaType="list" ofType="RmserviceOrderVO">
+			<id property="rsodNo" column="RSOD_NO"/>
+		</collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="stayMap" parameterType="PaginationInfo">
+		WITH RNUMRSVT AS (
+		    SELECT 
+		        ROWNUM RNUM, A.*    
+		    FROM (
+				SELECT 
+				    CHKIN_NO
+				    , CST_NM
+				    , CI_DT
+				    , CI_COWILL_YMD
+				    , RM_NO
+				    , CO_DT
+				    , CI_SE_CD
+				    , CO_EXCCLC_YN
+				    ,CASE 
+				        WHEN CI_SETLE_NO IS NOT NULL THEN CI_SETLE_NO  
+				        ELSE '0'
+				    END AS CI_SETLE_NO
+				    , CASE 
+				        WHEN CI_CAR_NO IS NOT NULL THEN CI_CAR_NO 
+				        ELSE 'X' 
+				    END AS CI_CAR_NO
+				FROM 
+				    TB_CHKOUT
+				    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+				    INNER JOIN TB_CSTMR USING (CST_NO)
+				<include refid="searchFrag" />
+				ORDER BY CHKIN_NO DESC	
+			)A
+		)
+		SELECT *
+		FROM RNUMRSVT
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	
+	<resultMap type="RmserviceOrderVO" id="RmsDtlMap" autoMapping="true">
+		<id property="rsodNo" column="RSOD_NO"/>
+		<collection property="rmServiceDList" javaType="list" ofType="RmserviceDetailsVO" autoMapping="true">
+			<association property="rmService" javaType="RmserviceVO" autoMapping="true">
+				<id property="rsCd" column="RS_CD"/>
+			</association>
+		</collection>
+	</resultMap>
+	
+	<select id="selectRms" resultMap="RmsDtlMap"  parameterType="String">
+		SELECT 
+		    RS_CD
+		    , RSOD_NO
+		    , CHKIN_NO
+		    , RSOD_SETLE_AMNT
+		    , RSOD_DT
+		    , RSD_DTL_CNT
+		    , RS_MENU_NM
+		    , RS_AMNT
+		    
+		FROM 
+		    TB_RMSERVICE_ORDER
+			INNER JOIN TB_RMSERVICE_DETAILS USING (RSOD_NO)
+			INNER JOIN TB_RMSERVICE USING (RS_CD)
+		WHERE 
+			CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<select id="selectStay" resultMap="stayMap" parameterType="String">
+		SELECT 
+		    CHKIN_NO,
+		    CST_NM,
+		    CST_HP,
+		    NVL(CI_CAR_NO, 'X') AS CI_CAR_NO,
+		    CI_DT,
+		    CI_COWILL_YMD,
+		    RM_NO,
+		    RMT_TYPE_CD,
+		    CO_DT,
+		    CASE 
+		        WHEN CI_SETLE_NO IS NOT NULL THEN CI_SETLE_NO  
+		        ELSE '0'
+		    END AS CI_SETLE_NO,
+		    NVL(RSOD_NO, 'X') AS RSOD_NO
+		FROM 
+		    TB_CHKOUT
+		    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO) 
+		    INNER JOIN TB_ROOM USING (RM_NO)
+		    LEFT OUTER JOIN TB_RMSERVICE_ORDER USING (CHKIN_NO)
+		       
+		WHERE 
+		    CHKIN_NO = #{chkinNo}
+	</select>
+	
+</mapper>

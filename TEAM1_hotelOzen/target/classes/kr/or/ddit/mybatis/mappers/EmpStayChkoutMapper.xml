@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpStayChkoutMapper">
+	
+	<sql id="searchFrag">
+		AND
+		<trim prefix="(" suffix=")" prefixOverrides="OR">
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR CHKIN_NO LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR CST_NM LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+        </trim>
+	</sql>
+	
+	<sql id="chkoutList">
+		<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			<![CDATA[
+			WHERE TRUNC(CI_COWILL_YMD) <= TRUNC(SYSDATE) AND CO_DT IS NULL
+			]]>
+			<include refid="searchFrag" />
+        </if>
+		<if test="!@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+			<![CDATA[
+	    	WHERE TRUNC(CI_COWILL_YMD) <= TRUNC(SYSDATE) AND CO_DT IS NULL
+	    	]]>
+	    </if>
+	</sql>
+	
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+		    COUNT(*)
+		FROM 
+		    TB_CHKOUT
+		    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		<include refid="chkoutList" />
+	</select>
+	
+	<resultMap type="ChkoutVO" id="chkoutMap" autoMapping="true">
+		<association property="chkin" javaType="ChkinVO" autoMapping="true">
+			<id property="chkinNo" column="CHKIN_NO"/>
+			<association property="cstmr" javaType="CstmrVO" autoMapping="true">
+				<id property="cstNo" column="CST_NO"/>
+				<result property="cstNm" column="CST_NM"/>
+			</association>
+		</association>
+		<collection property="rmsOrder" javaType="list" ofType="RmserviceOrderVO" autoMapping="true" >
+			<id property="rsodNo" column="RSOD_NO"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectList" resultMap="chkoutMap" parameterType="PaginationInfo">
+		WITH RNUMRSVT AS (
+		    SELECT 
+		        ROWNUM RNUM, A.*    
+		    FROM (
+				SELECT 
+				    CHKIN_NO
+				    , CST_NM
+				    , CST_NO
+				    , CI_DT
+				    , CI_COWILL_YMD
+				    , RM_NO
+				    , RSOD_NO
+				    , NVL(RSOD_SETLE_AMNT, '0') AS RSOD_SETLE_AMNT
+				    , CASE 
+				        WHEN CI_CAR_NO IS NOT NULL THEN CI_CAR_NO 
+				        ELSE 'X' 
+				    END AS CI_CAR_NO
+				FROM 
+				    TB_CHKOUT
+				    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+				    INNER JOIN TB_CSTMR USING (CST_NO)
+				    LEFT OUTER JOIN TB_RMSERVICE_ORDER USING (CHKIN_NO)
+				
+			    <include refid="chkoutList" />
+				ORDER BY CHKIN_NO DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMRSVT
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="select" resultMap="chkoutMap" parameterType="String">
+		SELECT 
+		    CHKIN_NO
+		    , CST_NM
+		    , CST_NO
+		    , CST_HP
+		    , CI_DT
+		    , CI_COWILL_YMD
+		    , RM_NO
+		    , CASE 
+		        WHEN CI_CAR_NO IS NOT NULL THEN CI_CAR_NO 
+		        ELSE 'X' 
+		    END AS CI_CAR_NO
+		FROM 
+		    TB_CHKOUT
+		    INNER JOIN TB_CHKIN USING (CHKIN_NO)
+		    INNER JOIN TB_CSTMR USING (CST_NO)
+		WHERE
+			CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<resultMap type="ChkoutVO" id="chkoutRmsMap" autoMapping="true">
+		<collection property="rmsOrder" javaType="list" ofType="RmserviceOrderVO" autoMapping="true">
+			<id property="rsodNo" column="RSOD_NO"/>
+			<collection property="rmServiceDList" javaType="list" ofType="RmserviceDetailsVO" autoMapping="true">
+				<association property="rmService" javaType="RmserviceVO" autoMapping="true">
+					<id property="rsCd" column="RS_CD"/>
+				</association>
+			</collection>
+		</collection>
+	</resultMap>
+	
+	<select id="selectRms" resultMap="chkoutRmsMap" parameterType="String">
+		SELECT 
+		    RS_CD
+		    , RS_MENU_NM
+		    , RSD_DTL_CNT
+		    , RS_AMNT
+		    , CHKIN_NO
+		    , RSOD_SETLE_AMNT
+		FROM 
+			TB_CHKOUT
+			INNER JOIN TB_RMSERVICE_ORDER USING (CHKIN_NO)
+			INNER JOIN TB_RMSERVICE_DETAILS USING (RSOD_NO)
+			INNER JOIN TB_RMSERVICE USING (RS_CD)
+		WHERE 
+		    CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<select id="selectCstmrNo" resultType="String" parameterType="String">
+		SELECT 
+			CST_NO
+		FROM 
+			TB_CHKIN
+			INNER JOIN TB_CSTMR USING(CST_NO)
+		WHERE 
+		    CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<select id="selectSetleNo" resultType="String">
+		SELECT 
+			'CKOT' || TO_CHAR(SYSDATE, 'YYMM') || LPAD(COALESCE(MAX(TO_NUMBER(SUBSTR(SETLE_NO, 9))), 0) + 1, 4, 0) AS SETLE_NO
+		FROM 
+			TB_SETLE
+		WHERE 
+			SETLE_NO LIKE ('CKOT%')
+			AND SUBSTR(SETLE_NO, 5, 2) = TO_CHAR(SYSDATE, 'YY') 
+			AND SUBSTR(SETLE_NO, 7, 2) = TO_CHAR(SYSDATE, 'MM')
+	</select>
+	
+	<select id="selectRmsAmnt" resultType="int" parameterType="String">
+		SELECT
+		    CO_EXCCLC_AMNT
+		FROM 
+			TB_CHKOUT
+		WHERE 
+			CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<insert id="insertSetle" parameterType="Map">
+		INSERT INTO TB_SETLE (
+		    SETLE_NO
+		    , CST_NO
+		    , SETLE_YMD
+		    , SETLE_AMNT
+		    , SETLE_STTUS_CD
+		
+		) VALUES (
+			#{setleNo}
+		  , #{cstNo}
+		  , SYSDATE
+		  , #{setleAmnt}
+		  , 'Y'
+		)
+	</insert>
+	
+	<update id="updateChkout" parameterType="Map">
+		UPDATE 
+			TB_CHKOUT
+		SET
+           CO_EXCCLC_YN = 'Y'
+	       , CO_EXCCLC_AMNT = #{setleAmnt}
+	       , CO_SETLE_NO = #{setleNo}
+	       , CO_DT = SYSDATE
+		WHERE
+		    CHKIN_NO = #{chkinNo}
+	</update>
+	
+	<select id="selectRsvtDTL" resultType="String" parameterType="String">
+		SELECT 
+			RSVT_DTL_NO
+		FROM 
+			TB_CHKIN
+		WHERE 
+			CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<update id="updatersvtDtl" parameterType="Map">
+		UPDATE 
+			TB_RSVT_DETAILS
+		SET
+           RSVT_SE = '사용완료'
+		WHERE
+		    RSVT_DTL_NO = #{rsvtDtlNo}
+	</update>
+	
+	<select id="selectRmNo" resultType="String" parameterType="String">
+		SELECT 
+			RM_NO
+		FROM 
+			TB_CHKIN
+		WHERE 
+			CHKIN_NO = #{chkinNo}
+	</select>
+	
+	<update id="updateRoom" parameterType="Map">
+		UPDATE 
+			TB_ROOM
+		SET
+           RM_AVLBL_YN = 'N'
+           , RM_AVLBL_DETAILS ='청소'
+           , RM_CLEAN = '청소요청'
+		WHERE
+		    RM_NO = #{rmNo}
+	</update>
+</mapper>

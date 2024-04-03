@@ -1,0 +1,79 @@
+@charset "UTF-8";
+
+
+.hr-detail {
+	border-top: 0.5px solid #808080;
+}
+
+.header-content-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* 요소를 세로 중앙으로 정렬합니다. */
+}
+
+.notice_rigth_top {
+    margin-left: auto; /* 맨 오른쪽으로 이동합니다. */
+}
+.detail-notice_title {
+	font-size : 1.3rem;
+	font-weight : bold;
+	line-height : 1.1;
+	letter-spacing : -0.025em;
+	color : #000000;
+}
+
+.btn-layout {
+	float : right;
+    margin-top: 20px;
+    margin-right :15rem;
+}
+button {
+  margin: 20px;
+  outline: none;
+}
+.custom-btn {
+  width: 130px;
+  height: 40px;
+  padding: 10px 25px;
+  border: 2px solid #000;
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-block;
+}
+.btn-11 {
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.btn-11:hover {
+   background: #000;
+  color: #fff;
+}
+.btn-11:before {
+    position: absolute;
+    content: '';
+    display: inline-block;
+    top: -180px;
+    left: 0;
+    width: 30px;
+    height: 100%;
+    background-color: #fff;
+    animation: shiny-btn1 3s ease-in-out infinite;
+}
+.btn-11:active{
+  box-shadow:  4px 4px 6px 0 rgba(255,255,255,.3),
+              -4px -4px 6px 0 rgba(116, 125, 136, .2), 
+    inset -4px -4px 6px 0 rgba(255,255,255,.2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .2);
+}
+
+
+@-webkit-keyframes shiny-btn1 {
+    0% { -webkit-transform: scale(0) rotate(45deg); opacity: 0; }
+    80% { -webkit-transform: scale(0) rotate(45deg); opacity: 0.5; }
+    81% { -webkit-transform: scale(4) rotate(45deg); opacity: 1; }
+    100% { -webkit-transform: scale(50) rotate(45deg); opacity: 0; }
+}

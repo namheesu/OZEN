@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.HrmPayMapper">
+
+<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+	SELECT COUNT(*)
+	FROM TB_SALARY_GIVE
+</select>
+
+<select id="selectList" resultType="SalaryGiveVO">
+	SELECT * 
+	FROM
+	TB_SALARY_GIVE
+
+</select>
+
+	<sql id="searchFrag">
+<!-- 			<trim prefix="(" suffix=")" prefixOverrides="OR"> -->
+<!-- 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)"> -->
+<!-- 					OR TB_EMP.EMP_NM LIKE '%${paging.simpleCondition.searchWord}%' -->
+<!-- 				</if> -->
+<!-- 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)"> -->
+<!-- 					OR EMP_JBGD LIKE '%${paging.simpleCondition.searchWord}%' -->
+<!-- 				</if> -->
+<!-- 			</trim> -->
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.searchWord)">
+					AND(
+						TB_EMP.EMP_NM LIKE '%${paging.simpleCondition.searchWord}%'
+						OR EMP_JBGD LIKE '%${paging.simpleCondition.searchWord}%'
+					)
+				</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.selectOneSearchWord)">
+				AND TB_EMP.EMP_DEPT='${paging.simpleCondition.selectOneSearchWord}'
+			</if>
+	</sql>
+
+
+
+
+
+<resultMap type="map" id="autoInQueryMap">
+	<id property="empNo" column="EMP_NO"/>
+	<result property="empNm" column="EMP_NM"/>
+	<result property="empJncmpYmd" column="EMP_JNCMP_YMD"/>
+	<result property="empDept" column="EMP_DEPT"/>
+	<result property="empDeptNo" column="EMP_DEPT_NO"/>
+	<result property="empMslay" column="MSLAY"/>
+	<result property="empNightWorkAllowance" column="NIGHT_WORK_ALLOWANCE"/>
+	<result property="empNationalPension" column="NATIONAL_PENSION"/>
+	<result property="empHealthInsrnc" column="HEALTH_INSRNC"/>
+	<result property="empLongTermCareInsrnc" column="LONG_TERM_CARE_INSRNC"/>
+	<result property="empEmplymInsrnc" column="EMPLYM_INSRNC"/>
+	<result property="empPaymentAmnt" column="PAYMENT_AMNT"/>
+	<result property="empDeductionAmnt" column="DEDUCTION_AMNT"/>
+	<result property="empThePay" column="THE_PAY"/>
+	<result property="empJbgd" column="EMP_JBGD"/>
+</resultMap>
+
+
+
+<select id="selectAutoSalaryCalInQuery" parameterType="hashmap" resultMap="autoInQueryMap">
+	SELECT 
+		TB_EMP.EMP_NM
+		, DECODE(EMP_JBGD, 'STF', '사원', 'DPM','팀장') AS EMP_JBGD
+		, TO_CHAR(TB_EMP.EMP_JNCMP_YMD, 'yyyy-mm-dd') AS EMP_JNCMP_YMD
+		, CASE WHEN TB_EMP.EMP_DEPT ='FTO' THEN '프론트오피스부'
+	        WHEN TB_EMP.EMP_DEPT ='HKP' THEN '하우스키핑부'
+	        WHEN TB_EMP.EMP_DEPT ='FMT' THEN '시설관리부'
+	        WHEN TB_EMP.EMP_DEPT ='CRM' THEN '고객관리부'
+	        WHEN TB_EMP.EMP_DEPT ='POS' THEN '재무부'
+	        WHEN TB_EMP.EMP_DEPT ='HRM' THEN '인사부'
+	        ELSE '부서미배정'
+	        END AS EMP_DEPT
+	    , DECODE(EMP_DEPT
+	      				, 'FTO', '1'
+	      				, 'HKP', '2'
+	      				, 'FMT', '3'
+	      				, 'CRM', '4'
+	      				, 'POS', '5'
+	      				, 'HRM', '6') AS EMP_DEPT_NO 
+		, FINAL.EMP_NO
+		, TO_CHAR(TRUNC(FINAL.MSLAY),'999,999,999,999,999')  AS MSLAY
+		, TO_CHAR(FINAL.NIGHT_WORK_ALLOWANCE,'999,999,999,999,999') AS NIGHT_WORK_ALLOWANCE
+		, TO_CHAR(FINAL.NATIONAL_PENSION,'999,999,999,999,999') AS NATIONAL_PENSION
+		, TO_CHAR(FINAL.HEALTH_INSRNC,'999,999,999,999,999') AS HEALTH_INSRNC
+		, TO_CHAR(FINAL.LONG_TERM_CARE_INSRNC,'999,999,999,999,999') AS LONG_TERM_CARE_INSRNC
+		, TO_CHAR(FINAL.EMPLYM_INSRNC,'999,999,999,999,999') AS EMPLYM_INSRNC
+		, TO_CHAR(TRUNC(FINAL.MSLAY) + FINAL.NIGHT_WORK_ALLOWANCE,'999,999,999,999,999' ) AS PAYMENT_AMNT
+		, TO_CHAR(FINAL.DEDUCTION_AMNT, '999,999,999,999,999') AS DEDUCTION_AMNT
+		, TO_CHAR(TRUNC(FINAL.MSLAY) + FINAL.NIGHT_WORK_ALLOWANCE - FINAL.DEDUCTION_AMNT,'999,999,999,999,999') AS THE_PAY
+	FROM
+		(SELECT
+			PRE.*
+			, PRE.D+PRE.E+PRE.N+PRE.G AS MYCNT  
+			, WTC.D AS D2
+			, WTC.E AS E2
+			, WTC.N AS N2
+			, WTC.O AS O2
+			, WTC.G AS G2
+			, PRE.D * WTC.D AS D3
+			, PRE.E * WTC.E AS E3
+			, PRE.N * WTC.N AS N3
+			, PRE.O * WTC.O AS O3
+			, PRE.G * WTC.G AS G3
+			, TRUNC(MSLAY/((PRE.D+PRE.E+PRE.N+PRE.G)*8),-1) AS ORDINARY_WAGE
+			, TRUNC(MSLAY/((PRE.D+PRE.E+PRE.N+PRE.G)*8),-1)*WTC.N*PRE.N AS NIGHT_WORK_ALLOWANCE
+			, TRUNC(PRE.DDC1*PRE.MSLAY, -1) AS NATIONAL_PENSION
+			, TRUNC(PRE.DDC2*PRE.MSLAY, -1) AS HEALTH_INSRNC
+			, TRUNC(PRE.DDC3*PRE.MSLAY, -1) AS LONG_TERM_CARE_INSRNC
+			, TRUNC(PRE.DDC4*PRE.MSLAY, -1) AS EMPLYM_INSRNC
+			, TRUNC(PRE.DDC1*PRE.MSLAY, -1)+ TRUNC(PRE.DDC2*PRE.MSLAY,-1)+TRUNC(PRE.DDC3*PRE.MSLAY,-1)+TRUNC(PRE.DDC4*PRE.MSLAY, -1) AS DEDUCTION_AMNT
+		FROM
+			(SELECT 
+				COUNT(CASE WHEN A.WORK_TYPE_CD ='D' THEN 1 END) AS D 
+				, COUNT(CASE WHEN A.WORK_TYPE_CD ='E' THEN 1 END) AS E
+				, COUNT(CASE WHEN A.WORK_TYPE_CD ='N' THEN 1 END) AS N
+				, COUNT(CASE WHEN A.WORK_TYPE_CD ='O' THEN 1 END) AS O
+				, COUNT(CASE WHEN A.WORK_TYPE_CD ='G' THEN 1 END) AS G
+				, NVL(C.ANSLRY_INFO, 0) as ANSLRY
+				, DECODE(C.ANSLRY_INFO, NULL , 0, C.ANSLRY_INFO, C.ANSLRY_INFO/12) AS MSLAY
+				, A.EMP_NO
+                , (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC001')*0.01 AS DDC1
+                , (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC002')*0.01 AS DDC2
+                , (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC003')*0.01 AS DDC3
+                , (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC004')*0.01 AS DDC4
+			FROM TB_DCLZ A LEFT OUTER JOIN TB_ANSLRY_LIST C ON (A.EMP_NO = C.EMP_NO)
+
+			<![CDATA[
+			WHERE A.DCLZ_YMD BETWEEN TO_DATE(#{bgn}, 'yy/MM/dd HH24miss') AND  TO_DATE(#{end}, 'yy/MM/dd HH24miss')
+			GROUP BY A.EMP_NO, C.ANSLRY_INFO
+			) PRE, (SELECT * FROM VW_WORK_TYPE_CD) WTC
+	) FINAL LEFT OUTER JOIN TB_EMP ON (FINAL.EMP_NO = TB_EMP.EMP_NO)
+	WHERE FINAL.MSLAY > 0 AND FINAL.MSLAY IS NOT NULL ]]>
+	<include refid="searchFrag" />
+	ORDER BY EMP_DEPT_NO ASC
+
+</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <select id="selectAutoSalaryCalInQuery" parameterType="hashmap" resultMap="autoInQueryMap"> -->
+<!-- 	SELECT  -->
+<!-- 		TB_EMP.EMP_NM -->
+<!-- 		, DECODE(EMP_JBGD, 'STF', '사원', 'DPM','팀장') AS EMP_JBGD -->
+<!-- 		, TO_CHAR(TB_EMP.EMP_JNCMP_YMD, 'yyyy-mm-dd') AS EMP_JNCMP_YMD -->
+<!-- 		, CASE WHEN TB_EMP.EMP_DEPT ='FTO' THEN '프론트오피스부' -->
+<!-- 	        WHEN TB_EMP.EMP_DEPT ='HKP' THEN '하우스키핑부' -->
+<!-- 	        WHEN TB_EMP.EMP_DEPT ='FMT' THEN '시설관리부' -->
+<!-- 	        WHEN TB_EMP.EMP_DEPT ='CRM' THEN '고객관리부' -->
+<!-- 	        WHEN TB_EMP.EMP_DEPT ='POS' THEN '재무부' -->
+<!-- 	        WHEN TB_EMP.EMP_DEPT ='HRM' THEN '인사부' -->
+<!-- 	        ELSE '부서미배정' -->
+<!-- 	        END AS EMP_DEPT -->
+<!-- 	    , DECODE(EMP_DEPT -->
+<!-- 	      				, 'FTO', '1' -->
+<!-- 	      				, 'HKP', '2' -->
+<!-- 	      				, 'FMT', '3' -->
+<!-- 	      				, 'CRM', '4' -->
+<!-- 	      				, 'POS', '5' -->
+<!-- 	      				, 'HRM', '6') AS EMP_DEPT_NO  -->
+<!-- 		, FINAL.EMP_NO -->
+<!-- 		, TO_CHAR(TRUNC(FINAL.MSLAY),'999,999,999,999,999')  AS MSLAY -->
+<!-- 		, TO_CHAR(FINAL.NIGHT_WORK_ALLOWANCE,'999,999,999,999,999') AS NIGHT_WORK_ALLOWANCE -->
+<!-- 		, TO_CHAR(FINAL.NATIONAL_PENSION,'999,999,999,999,999') AS NATIONAL_PENSION -->
+<!-- 		, TO_CHAR(FINAL.HEALTH_INSRNC,'999,999,999,999,999') AS HEALTH_INSRNC -->
+<!-- 		, TO_CHAR(FINAL.LONG_TERM_CARE_INSRNC,'999,999,999,999,999') AS LONG_TERM_CARE_INSRNC -->
+<!-- 		, TO_CHAR(FINAL.EMPLYM_INSRNC,'999,999,999,999,999') AS EMPLYM_INSRNC -->
+<!-- 		, TO_CHAR(TRUNC(FINAL.MSLAY) + FINAL.NIGHT_WORK_ALLOWANCE,'999,999,999,999,999' ) AS PAYMENT_AMNT -->
+<!-- 		, TO_CHAR(FINAL.DEDUCTION_AMNT, '999,999,999,999,999') AS DEDUCTION_AMNT -->
+<!-- 		, TO_CHAR(TRUNC(FINAL.MSLAY) + FINAL.NIGHT_WORK_ALLOWANCE - FINAL.DEDUCTION_AMNT,'999,999,999,999,999') AS THE_PAY -->
+<!-- 	FROM -->
+<!-- 		(SELECT -->
+<!-- 			PRE.* -->
+<!-- 			, PRE.D+PRE.E+PRE.N+PRE.G AS MYCNT   -->
+<!-- 			, WTC.D AS D2 -->
+<!-- 			, WTC.E AS E2 -->
+<!-- 			, WTC.N AS N2 -->
+<!-- 			, WTC.O AS O2 -->
+<!-- 			, WTC.G AS G2 -->
+<!-- 			, PRE.D * WTC.D AS D3 -->
+<!-- 			, PRE.E * WTC.E AS E3 -->
+<!-- 			, PRE.N * WTC.N AS N3 -->
+<!-- 			, PRE.O * WTC.O AS O3 -->
+<!-- 			, PRE.G * WTC.G AS G3 -->
+<!-- 			, TRUNC(MSLAY/((PRE.D+PRE.E+PRE.N)*8),-1) AS ORDINARY_WAGE -->
+<!-- 			, TRUNC(MSLAY/((PRE.D+PRE.E+PRE.N)*8),-1)*WTC.N*PRE.N AS NIGHT_WORK_ALLOWANCE -->
+<!-- 			, TRUNC(PRE.DDC1*PRE.MSLAY, -1) AS NATIONAL_PENSION -->
+<!-- 			, TRUNC(PRE.DDC2*PRE.MSLAY, -1) AS HEALTH_INSRNC -->
+<!-- 			, TRUNC(PRE.DDC3*PRE.MSLAY, -1) AS LONG_TERM_CARE_INSRNC -->
+<!-- 			, TRUNC(PRE.DDC4*PRE.MSLAY, -1) AS EMPLYM_INSRNC -->
+<!-- 			, TRUNC(PRE.DDC1*PRE.MSLAY, -1)+ TRUNC(PRE.DDC2*PRE.MSLAY,-1)+TRUNC(PRE.DDC3*PRE.MSLAY,-1)+TRUNC(PRE.DDC4*PRE.MSLAY, -1) AS DEDUCTION_AMNT -->
+<!-- 		FROM -->
+<!-- 			(SELECT  -->
+<!-- 				COUNT(CASE WHEN A.WORK_TYPE_CD ='D' THEN 1 END) AS D  -->
+<!-- 				, COUNT(CASE WHEN A.WORK_TYPE_CD ='E' THEN 1 END) AS E -->
+<!-- 				, COUNT(CASE WHEN A.WORK_TYPE_CD ='N' THEN 1 END) AS N -->
+<!-- 				, COUNT(CASE WHEN A.WORK_TYPE_CD ='O' THEN 1 END) AS O -->
+<!-- 				, COUNT(CASE WHEN A.WORK_TYPE_CD ='G' THEN 1 END) AS G -->
+<!-- 				, NVL(C.ANSLRY_INFO, 0) as ANSLRY -->
+<!-- 				, DECODE(C.ANSLRY_INFO, NULL , 0, C.ANSLRY_INFO, C.ANSLRY_INFO/12) AS MSLAY -->
+<!-- 				, A.EMP_NO -->
+<!-- 				, (DDC1.DDC_RT)*0.01 AS DDC1 -->
+<!-- 				, (DDC2.DDC_RT)*0.01 AS DDC2 -->
+<!-- 				, (DDC3.DDC_RT)*0.01 AS DDC3 -->
+<!-- 				, (DDC4.DDC_RT)*0.01 AS DDC4 -->
+<!-- 			FROM TB_DCLZ A LEFT OUTER JOIN TB_ANSLRY_LIST C ON (A.EMP_NO = C.EMP_NO) -->
+<!-- 						CROSS JOIN (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC001') DDC1 -->
+<!-- 						CROSS JOIN (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC002') DDC2 -->
+<!-- 						CROSS JOIN (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC003') DDC3 -->
+<!-- 						CROSS JOIN (SELECT DDC_RT FROM TB_DEDUCTION WHERE DDC_NO = 'DDC004') DDC4 -->
+<!-- 			<![CDATA[ -->
+<!-- 			WHERE TO_CHAR(A.DCLZ_YMD,'YYYY/MM/DD') >= #{y1} || #{m1} || #{d1} AND  TO_CHAR(A.DCLZ_YMD,'YYYY/MM/DD') < #{y2} || #{m2} || #{d2} -->
+<!-- 			GROUP BY A.EMP_NO, C.ANSLRY_INFO, DDC1.DDC_RT,DDC2.DDC_RT,DDC3.DDC_RT,DDC4.DDC_RT -->
+<!-- 			) PRE, (SELECT * FROM VW_WORK_TYPE_CD) WTC -->
+<!-- 	) FINAL LEFT OUTER JOIN TB_EMP ON (FINAL.EMP_NO = TB_EMP.EMP_NO) -->
+<!-- 	WHERE FINAL.MSLAY > 0 AND FINAL.MSLAY IS NOT NULL ]]> -->
+<!-- 	ORDER BY EMP_DEPT_NO ASC -->
+
+<!-- </select> -->
+
+</mapper>

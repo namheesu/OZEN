@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd" >
+<tiles-definitions>
+
+	<definition name="abstractCstmrParent" template="/WEB-INF/views/cstmr/layout.jsp" preparer="profilePreparer">
+		<put-attribute name="title" value="HotelOzen" />
+	  	<put-attribute name="preScript" value="/WEB-INF/includee/cstmr/preScript.jsp" />
+	  	<put-attribute name="scrapList" value="/WEB-INF/includee/cstmr/scrapList.jsp" />
+	  	<put-attribute name="chatbot" value="/WEB-INF/includee/cstmr/chatbot.jsp" />
+	  	<put-attribute name="postScript" value="/WEB-INF/includee/cstmr/postScript.jsp" />
+	  	<put-attribute name="footer" value="/WEB-INF/includee/cstmr/footer.jsp" />
+	</definition>
+
+	<definition name="abstractEmpParent" template="/WEB-INF/views/emp/layout.jsp" preparer="profilePreparer">
+		<put-attribute name="title" value="HotelOzen" />
+	  	<put-attribute name="preScript" value="/WEB-INF/includee/emp/preScript.jsp" />
+	  	<put-attribute name="headerMenu" value="/WEB-INF/includee/emp/headerMenu.jsp" />
+	  	<put-attribute name="postScript" value="/WEB-INF/includee/emp/postScript.jsp" />
+	  	<put-attribute name="sideBar" value="/WEB-INF/includee/emp/sideBar.jsp" />
+	  	<put-attribute name="footer" value="/WEB-INF/includee/emp/footer.jsp" />
+	</definition>
+	
+	<definition name="cstmr/index" extends="abstractCstmrParent">
+		<put-attribute name="header" value="/WEB-INF/includee/cstmr/headerIndex.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/cstmr/index.jsp" />
+	</definition>
+	
+	<definition name="error/*" template="/WEB-INF/views/error/error.jsp" >
+		<put-attribute name="contentPage" value="/WEB-INF/views/error/{1}.jsp"></put-attribute>
+	</definition>
+	
+	<definition name="cstmr/myinfo/mypage/*" template="/WEB-INF/views/cstmr/myinfo/mypage/mypageLayout.jsp">
+		<put-attribute name="contentPage" value="/WEB-INF/views/cstmr/myinfo/mypage/{1}.jsp" />
+	</definition>
+	
+	<definition name="emp/index" extends="abstractEmpParent">
+		<put-attribute name="contentPage" value="/WEB-INF/views/emp/index.jsp" />
+	</definition>
+	
+	<definition name="emp/auth/*" template ="/WEB-INF/views/emp/auth.jsp">		
+		<put-attribute name="title" value="HotelOzen" />
+	  	<put-attribute name="preScript" value="/WEB-INF/includee/emp/preScript.jsp" />
+	  	<put-attribute name="contentPage" value="/WEB-INF/views/emp/auth/{1}.jsp" />		
+	  	<put-attribute name="postScript" value="/WEB-INF/includee/emp/postScript.jsp" />
+	</definition>
+	
+	<definition name="emp/*" extends="abstractEmpParent">
+		<put-attribute name="contentPage" value="/WEB-INF/views/emp/{1}.jsp" />
+	</definition>
+	<definition name="emp/*/*" extends="abstractEmpParent">
+		<put-attribute name="contentPage" value="/WEB-INF/views/emp/{1}/{2}.jsp" />
+	</definition>
+	<definition name="emp/*/*/*" extends="abstractEmpParent">
+		<put-attribute name="contentPage" value="/WEB-INF/views/emp/{1}/{2}/{3}.jsp" />
+	</definition>
+	<definition name="emp/*/*/*/*" extends="abstractEmpParent">
+		<put-attribute name="contentPage" value="/WEB-INF/views/emp/{1}/{2}/{3}/{4}.jsp" />
+	</definition>
+
+	<definition name="*/*" extends="abstractCstmrParent">
+		<put-attribute name="header" value="/WEB-INF/includee/cstmr/headerMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/cstmr/{1}/{2}.jsp" />
+	</definition>
+
+	<definition name="*/*/*" extends="abstractCstmrParent">
+		<put-attribute name="header" value="/WEB-INF/includee/cstmr/headerMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+	<definition name="*/*/*/*" extends="abstractCstmrParent">
+		<put-attribute name="header" value="/WEB-INF/includee/cstmr/headerMenu.jsp" />
+		<put-attribute name="contentPage" value="/WEB-INF/views/{1}/{2}/{3}/{4}.jsp" />
+	</definition>
+
+</tiles-definitions>

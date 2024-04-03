@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+*{
+	margin:0;
+	padding:0;
+}
+
+.ozenFooter {
+	height : 370px;
+	z-index : 100;
+}
+
+.footer_row {
+	margin-left : 50px;
+}
+
+.footer-img {
+      width: 50px;
+      height: 50px;
+    }
+.footer_top{
+	padding-top: 5rem;
+	padding-bottom : 5rem;
+}
+
+.footer_info{
+	text-align : right;
+	
+}
+
+
+.onText {
+	text-align : right;
+    border-bottom: 1px solid rgba(255, 255, 255, .2);
+    padding-bottom: 30px;
+    
+	margin-right: 50px;
+	color: white;
+	
+}
+.text{
+	margin-right: 15px;
+	 padding-top: 30px;
+}

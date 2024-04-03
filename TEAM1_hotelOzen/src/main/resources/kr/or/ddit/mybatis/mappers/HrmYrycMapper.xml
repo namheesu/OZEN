@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.HrmYrycMapper">
+
+	<insert id="insert" parameterType="HrmAnnualVO">
+		INSERT INTO TB_ANNUAL_LEAVE_USE (
+			ANL_LEA_USE_NO
+			, EMP_NO
+			, ANL_LEA_BGN_YMD
+			, ANL_LEA_END_YMD
+			, ANL_LEA_RM
+			, ANL_LEA_INFO
+			, ANL_LEA_YMD
+			, EMP_RQ_NO
+			, RQST_SE
+		) VALUES (
+			#{anlLeaUseNo,jdbcType=CHAR}
+			, #{empNo,jdbcType=VARCHAR}
+			, #{anlLeaBgnYmd,jdbcType=DATE}
+			, #{anlLeaEndYmd,jdbcType=DATE}
+			, #{anlLeaRm,jdbcType=VARCHAR}
+			, 'V'
+			, SYSDATE
+			, #{empRqNo,jdbcType=VARCHAR}
+			, '대기'
+		)
+	</insert>
+
+	<select id="select" parameterType="string">
+		SELECT
+			DISTINCT(A.ANL_LEA_USE_NO)
+			, A.EMP_NO
+            , B.EMP_NM AS EMP_NM
+            , CASE WHEN B.EMP_DEPT = 'FTO' THEN '프론트오피스부'
+                WHEN B.EMP_DEPT = 'HKP' THEN '하우스키핑부'
+                WHEN B.EMP_DEPT = 'FMT' THEN '시설관리부'
+                WHEN B.EMP_DEPT = 'CRM' THEN '고객관리부'
+                WHEN B.EMP_DEPT = 'POS' THEN '재무부'
+                ELSE '인사부'
+                END AS EMP_DEPT
+            , DECODE(B.EMP_JBGD, 'STF', '사원', 'DPM', '팀장') AS EMP_JBGD
+            , B.EMP_ANNUAL_LEAVE
+            , B.EMP_TEL
+            , (A.ANL_LEA_END_YMD - A.ANL_LEA_BGN_YMD)+1 AS USE_DATE
+			, A.ANL_LEA_BGN_YMD
+			, A.ANL_LEA_END_YMD
+			, A.ANL_LEA_RM
+			, A.ANL_LEA_INFO
+			, A.ANL_LEA_YMD
+			, A.EMP_RQ_NO
+            , C.EMP_NM AS EMP_RQ_NM
+			, A.RQST_SE
+			, A.RQST_PURCHS_YMD
+		FROM
+		TB_ANNUAL_LEAVE_USE A
+			LEFT OUTER JOIN TB_EMP B ON (A.EMP_NO = B.EMP_NO)
+			LEFT OUTER JOIN TB_EMP C ON (A.EMP_RQ_NO = C.EMP_NO)
+	    WHERE ANL_LEA_USE_NO = #{anlLeaUseNo,jdbcType=CHAR}
+	</select>
+
+	<sql id="searchFrag">
+<!-- 		<trim prefix="WHERE" prefixOverrides="AND">  -->
+<!-- 			<trim prefix="(" suffix=")" prefixOverrides="OR"> -->
+				
+<!-- 			</trim> -->
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+					AND(
+						 C.EMP_NM LIKE '%${simpleCondition.searchWord}%'	
+						OR A.EMP_NO LIKE '%${simpleCondition.searchWord}%'
+					)
+				</if>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+				AND A.EMP_NO IN (SELECT EMP_NO FROM TB_EMP WHERE EMP_DEPT='${simpleCondition.selectOneSearchWord}')
+			</if>
+<!-- 		</trim> -->
+	</sql>
+
+	<select id="selectTotalRecord">
+		SELECT COUNT(*)
+		FROM
+		TB_ANNUAL_LEAVE_USE A
+			LEFT OUTER JOIN TB_ANNUAL_LEAVE_GIVE B ON (A.EMP_NO = B.EMP_NO)
+			LEFT OUTER JOIN TB_EMP C ON (A.EMP_NO = C.EMP_NO)
+		<include refid="searchFrag" />
+	</select>
+
+	<select id="selectList" resultType="HrmAnnualVO" parameterType="PaginationInfo">
+		WITH RNUMYRYC AS (	
+			SELECT 
+				ROWNUM RNUM, FINAL.*
+			FROM (
+				SELECT 
+					A.ANL_LEA_USE_NO
+					, A.EMP_NO
+					, A.ANL_LEA_BGN_YMD
+					, A.ANL_LEA_END_YMD
+					, (A.ANL_LEA_END_YMD - A.ANL_LEA_BGN_YMD)+1 AS USE_DATE
+					, A.ANL_LEA_RM
+					, A.ANL_LEA_INFO
+					, A.ANL_LEA_YMD
+					, A.EMP_RQ_NO
+					, A.RQST_SE
+					, A.RQST_PURCHS_YMD
+					, B.ANL_LEA_GIVE_YMD
+                    , B.ANL_LEA_GIVE_AMNT
+                    , C.EMP_TEL
+                    , C.EMP_DEPT
+                    , C.EMP_NM
+                    , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = A.EMP_RQ_NO) AS EMP_RQ_NM
+                    , C.EMP_ANNUAL_LEAVE
+				FROM
+					TB_ANNUAL_LEAVE_USE A
+						LEFT OUTER JOIN TB_ANNUAL_LEAVE_GIVE B ON (A.EMP_NO = B.EMP_NO)
+						LEFT OUTER JOIN TB_EMP C ON (A.EMP_NO = C.EMP_NO)
+					 WHERE A.RQST_SE = '승인'
+				<include refid="searchFrag" />
+				ORDER BY 
+					A.ANL_LEA_USE_NO DESC
+			) FINAL
+		)
+		SELECT *
+		FROM RNUMYRYC
+		<![CDATA[
+		WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+
+	<select id="selectAnlLeaUseNo" resultType="string">
+		SELECT 
+		    NVL2(MAX(ANL_LEA_USE_NO),'AU'||TO_CHAR(SYSDATE,'YY')||LPAD(SUBSTR(MAX(ANL_LEA_USE_NO),-5)+1, 5, 0), 'AU'||TO_CHAR(SYSDATE,'YY')||'00001')
+		FROM TB_ANNUAL_LEAVE_USE
+		WHERE ANL_LEA_USE_NO LIKE 'AU'||TO_CHAR(SYSDATE,'YY')||'%'
+	</select>
+	
+	<select id="selectAnlReciverEmpNo" parameterType="string" resultType="HrmAnnualVO">
+		 SELECT 
+	         A.EMP_NO AS EMP_RQ_NO
+			, A.EMP_NM AS EMP_RQ_NM
+	        , A.EMP_DEPT
+		FROM
+	    	TB_EMP A
+	    	INNER JOIN 
+	    		(SELECT 
+					EMP_NO
+					, EMP_NM
+			        , EMP_DEPT
+				FROM TB_EMP
+				WHERE EMP_NO = #{empNo,jdbcType=VARCHAR}) B
+	    	ON (A.EMP_DEPT = B.EMP_DEPT)
+	    	WHERE EMP_JBGD='DPM' AND ROWNUM = 1
+	</select>
+
+
+	<update id="updateOfSender" parameterType="HrmAnnualVO">
+		UPDATE TB_ANNUAL_LEAVE_USE
+		SET
+			ANL_LEA_BGN_YMD
+			, ANL_LEA_END_YMD
+			, ANL_LEA_RM
+			, ANL_LEA_INFO
+			, ANL_LEA_YMD
+			, EMP_RQ_NO
+		WHERE
+		    ANL_LEA_USE_NO = #{anlLeaUseNo,jdbcType=CHAR}
+	</update>
+	
+	<update id="updateOfReceiver" parameterType="HrmAnnualVO">
+		UPDATE TB_ANNUAL_LEAVE_USE
+		SET
+		    RQST_SE = #{rqstSe,jdbcType=VARCHAR}
+		    , ANL_LEA_INFO = #{anlLeaInfo,jdbcType=CHAR}
+		    , RQST_PURCHS_YMD =  SYSDATE
+		WHERE
+		    ANL_LEA_USE_NO = #{anlLeaUseNo,jdbcType=CHAR}
+	
+	</update>
+	
+	<delete id="delete">
+	
+	</delete>
+
+</mapper>

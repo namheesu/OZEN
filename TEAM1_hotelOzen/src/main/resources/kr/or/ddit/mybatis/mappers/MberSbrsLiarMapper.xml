@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.MberSbrsLiarMapper">
+
+	<select id="sbrsLiarList" resultType="SbrsVO">
+		SELECT
+		    SBRS_CD
+		    , TO_CHAR(TO_DATE(SUBSTR(SBRS_UTLZT_DT, 1, 2) || ':' || SUBSTR(SBRS_UTLZT_DT, 3, 2), 'HH24:MI'), 'HH24:MI') 
+		        || '-' || 
+		        TO_CHAR(TO_DATE(SUBSTR(SBRS_UTLZT_DT, 5, 2) || ':' || SUBSTR(SBRS_UTLZT_DT, 7, 2), 'HH24:MI'), 'HH24:MI') 
+		    AS SBRS_UTLZT_DT
+		    , SBRS_UTLZT_DATE
+		    , SBRS_FLOOR
+		    , SBRS_NM
+		    , SBRS_ADULT_FEE
+		    , SBRS_CHILD_FEE
+		    , SBRS_EN
+		FROM TB_SBRS
+	</select>
+
+</mapper>

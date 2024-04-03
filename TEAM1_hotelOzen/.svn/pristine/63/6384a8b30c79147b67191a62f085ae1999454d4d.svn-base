@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.OprtnSttsMapper">
+
+<!-- 비품시작 -->
+
+	<sql id="fxtrsSearchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND" > 
+			<trim prefix="(" suffix=")" prefixOverrides="OR">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsSearchWord)">
+					OR RQST_NO LIKE '%${paging.simpleCondition.fxtrsSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsSearchWord)">
+					OR EMP_NM LIKE '%${paging.simpleCondition.fxtrsSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsSearchWord)">
+					OR EMP_RQ_NM LIKE '%${paging.simpleCondition.fxtrsSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsSearchWord)">
+					OR EMP_PURCHS_NM LIKE '%${paging.simpleCondition.fxtrsSearchWord}%'
+				</if>
+			</trim>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsOneSearchWord)">
+				AND RQST_SE = '${paging.simpleCondition.fxtrsOneSearchWord}'
+			</if>
+		</trim>
+	</sql>
+	
+	<select id="selectTotalRecord"  parameterType="PaginationInfo" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE 
+			EMP_NO = #{empNo} 
+		OR EMP_RQ_NO = #{empNo} 
+		OR EMP_PURCHS_NO = #{empNo}
+		<include refid="fxtrsSearchFrag" />
+	</select>
+	
+	<select id="fxtrsSelectList" parameterType="string" resultType="FxtrsRqstVO">
+		WITH RNUMFXTRS AS(
+		    SELECT
+		        ROWNUM RNUM, A.*
+		    FROM(
+		        SELECT 
+		            RQST_NO         
+				    , EMP_NO        
+				    , RQST_YMD      
+				    , RQST_AMNT     
+				    , RQST_PURCHS_YMD   
+				    , RQST_SE       
+				    , EMP_RQ_NO     
+				    , EMP_PURCHS_NO 
+				    , RQST_RQ_YMD
+				    , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_NO) EMP_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_RQ_NO) EMP_RQ_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_PURCHS_NO) EMP_PURCHS_NM
+		        FROM 
+		            TB_FXTRS_RQST
+		        WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo}
+		        ORDER BY RQST_YMD DESC , RQST_PURCHS_YMD DESC)A
+		        <include refid="fxtrsSearchFrag"/>
+		        ORDER BY RQST_YMD DESC
+		    
+		)
+		SELECT *
+		FROM RNUMFXTRS
+		<![CDATA[
+		    WHERE RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow} 
+		]]>
+	</select>
+	
+	<select id="fxtrsSelectTotalRecord">
+		SELECT
+			COUNT(*)
+		FROM (
+		        SELECT 
+		            RQST_NO         
+				    , EMP_NO        
+				    , RQST_YMD      
+				    , RQST_AMNT     
+				    , RQST_PURCHS_YMD   
+				    , RQST_SE       
+				    , EMP_RQ_NO     
+				    , EMP_PURCHS_NO 
+				    , RQST_RQ_YMD
+				    , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_NO) EMP_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_RQ_NO) EMP_RQ_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_PURCHS_NO) EMP_PURCHS_NM
+		        FROM 
+		            TB_FXTRS_RQST 
+		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo}) T
+		<include refid="fxtrsSearchFrag" />
+	</select>
+
+<!-- 비품 끝 -->
+
+
+<!-- 연차시작  -->
+
+	<sql id="annualSearchFrag">
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<trim prefix="(" suffix=")" prefixOverrides="OR">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_NO LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_RQ_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+			</trim>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualOneSearchWord)">
+					AND RQST_SE = '${paging.simpleCondition.annualOneSearchWord}'
+				</if>
+		</trim>
+	</sql>
+
+
+
+	<select id="annSelectList" parameterType="string" resultType="AnnualVO">
+		WITH RNUMANNUAL AS(
+		    SELECT
+		        ROWNUM ANL_RNUM, A.*
+		    FROM(
+		        SELECT 
+		            ANL_LEA_USE_NO
+		            , EMP_NO
+		            , ANL_LEA_YMD
+		            , ANL_LEA_BGN_YMD
+		            , ANL_LEA_END_YMD
+		            , RQST_PURCHS_YMD
+		            , RQST_SE
+		            , EMP_RQ_NO
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_ANNUAL_LEAVE_USE.EMP_NO) EMP_NM
+            		, (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_ANNUAL_LEAVE_USE.EMP_RQ_NO) EMP_RQ_NM
+		        FROM 
+		            TB_ANNUAL_LEAVE_USE
+		        WHERE (EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo})
+		        <include refid="annualSearchFrag"></include>
+		        ORDER BY ANL_LEA_YMD DESC
+		    )A
+		)
+		SELECT *
+		FROM RNUMANNUAL
+		<![CDATA[
+		    WHERE ANL_RNUM >= #{paging.startRow} AND ANL_RNUM <= #{paging.endRow}
+		]]>
+	</select>
+	
+	<select id="annSelectTotalRecord">
+		SELECT
+			COUNT(*)
+		FROM 
+			TB_ANNUAL_LEAVE_USE
+		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo}
+		<include refid="annualSearchFrag" />
+	</select>
+
+</mapper>

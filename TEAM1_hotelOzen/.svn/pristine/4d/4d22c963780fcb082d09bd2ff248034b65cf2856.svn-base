@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.EmpFxtrsUseMapper">
+
+	<sql id="searchFrag">
+		<trim prefix="WHERE" prefixOverrides="OR">
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR EMP_NM LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	            OR FXUD_YMD LIKE '%${simpleCondition.searchWord}%'
+	        </if>
+		</trim>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM 
+			TB_FXTRS_USE
+		<include refid="searchFrag" />
+	</select>
+
+	<resultMap type="FxtrsUseVO" id="fxtrsUMap" autoMapping="true">
+		<id property="fxuseNo" column="FXUSE_NO"></id>
+		<association property="emp" javaType="EmpVO" autoMapping="true">
+			<id property="empNo" column="EMP_NO"/>
+		</association>
+		<collection property="fxtrsUseDtl" javaType="list" ofType="FxtrsUseDetailsVO" autoMapping="true">
+			<id property="fxCd" column="FX_CD"/>
+		</collection>
+	</resultMap>
+
+	<select id="selectList" resultMap="fxtrsUMap" parameterType="PaginationInfo">
+		WITH RNUMFXTRSU AS (
+			SELECT 
+				ROWNUM RNUM, A.*    
+		    FROM (
+				SELECT  
+				   FXUSE_NO
+				   , RM_NO
+				   , EMP_NM
+				   , EMP_NO
+				   ,FXUSE_YMD
+				FROM TB_FXTRS_USE
+				    INNER JOIN TB_FXTRS_USE_DETAILS USING (FXUSE_NO)
+				    INNER JOIN TB_EMP USING(EMP_NO)
+				<include refid="searchFrag" />
+				GROUP BY 
+				    FXUSE_NO
+				   , RM_NO
+				   , EMP_NM
+				   , EMP_NO
+				   ,FXUSE_YMD
+				ORDER BY 
+				    FXUSE_NO DESC
+			)A
+		)
+		SELECT *
+		FROM RNUMFXTRSU
+		<![CDATA[
+			WHERE RNUM >= #{startRow} AND RNUM <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectRmFloor" resultType="RoomVO" parameterType="String">
+		SELECT 
+		    RM_NO
+		    , RMT_TYPE_CD
+		FROM 
+			TB_ROOM
+		WHERE 
+			RM_NO LIKE '${floor}%'
+	</select>
+	
+	<select id="selectFxUseNo" resultType="String">
+		SELECT 
+		    'FXU' || TO_CHAR(SYSDATE, 'YYMM') || LPAD(COALESCE(MAX(TO_NUMBER(SUBSTR(FXUSE_NO, 8))), 0) + 1, 4, '0') AS FXUSE_NO 
+		FROM 
+		    TB_FXTRS_USE
+		WHERE 
+		    FXUSE_NO LIKE ('FXU%')
+		    AND SUBSTR(FXUSE_NO, 4, 2) = TO_CHAR(SYSDATE, 'YY') 
+		    AND SUBSTR(FXUSE_NO, 6, 2) = TO_CHAR(SYSDATE, 'MM')
+	</select>
+	
+	<select id="selectFxCd" resultType="FxtrsClsCdVO">
+		SELECT 
+		    FX_CLS_CD
+		    , FX_CLS_NM
+		FROM 
+			TB_FXTRS_CLS_CD
+	</select>
+	
+	<resultMap type="FxtrsVO" id="fxtrsMap" autoMapping="true">
+		<id property="fxCd" column="FX_CD"></id>
+		<association property="fxtrsClsCd" javaType="FxtrsClsCdVO" autoMapping="true">
+			<id property="fxClsCd" column="FX_CLS_CD"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectFxNm" resultMap="fxtrsMap" parameterType="String">
+		SELECT 
+		    FX_CD
+		    , FX_NM
+		    , FX_CLS_CD
+		    , FX_CLS_NM
+		FROM TB_FXTRS
+		    INNER JOIN TB_FXTRS_CLS_CD USING(FX_CLS_CD)
+		WHERE 
+			FX_CLS_CD = #{fxCd}
+	</select>
+	
+	<insert id="insertFxtrsUse" parameterType="Map">
+		INSERT INTO TB_FXTRS_USE (
+		    FXUSE_NO
+		    , FXUSE_YMD
+		    , EMP_NO
+		    , RM_NO
+		) VALUES (
+		    #{fxuseNo}
+		  , #{fxuseYmd}
+		  , #{empNo}
+		  , #{rmNo}
+		)
+	</insert>
+	
+	<select id="selectFxClsCd" resultType="String" parameterType="String">
+		SELECT 
+		    FX_CLS_CD
+		FROM 
+			TB_FXTRS_CLS_CD
+		WHERE 
+			FX_CLS_NM = #{fxclsNm}
+	</select>
+	
+	<insert id="insertFxtrsUseDtl" parameterType="Map">
+		INSERT INTO TB_FXTRS_USE_DETAILS (
+	        FX_CD
+		    , FXUD_CNT
+		    , FXUSE_NO
+		) VALUES (
+		    #{fxCd}
+		  , #{fxudCnt}
+		  , #{fxuseNo}
+		)
+	</insert>
+	
+	<select id="selectFxPresCnt" resultType="String" parameterType="String">
+		SELECT 
+		    FX_PRES_CNT
+		FROM 
+			TB_FXTRS
+		WHERE 
+			FX_CD = #{fxCd}
+	</select>
+	
+	<update id="updateFxPresCnt" parameterType="Map">
+		UPDATE 
+			TB_FXTRS
+		SET
+		    FX_PRES_CNT = #{updateCnt}
+		WHERE
+		    FX_CD = #{fxCd}
+	</update>
+	
+	<resultMap type="FxtrsUseVO" id="fxtrsUseMap" autoMapping="true">
+		<id property="fxuseNo" column="FXUSE_NO"/>
+		<association property="emp" javaType="EmpVO" autoMapping="true">
+			<id property="empNo" column="EMP_NO"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectFxtrsUse" resultMap="fxtrsUseMap" parameterType="String">
+		SELECT 
+		    FXUSE_NO
+		    , FXUSE_YMD
+		    , EMP_NM
+		    , EMP_NO
+		    , RM_NO
+		FROM 
+		    TB_FXTRS_USE
+		    INNER JOIN TB_EMP USING(EMP_NO)
+		WHERE 
+			FXUSE_NO = #{fxuseNo}
+	</select>
+	
+	<resultMap type="FxtrsUseDetailsVO" id="fxtrsUseDtlMap" autoMapping="true">
+		<association property="fxtrs" javaType="FxtrsVO" autoMapping="true">
+			<id property="fxCd" column="FX_CD"/>
+			<association property="fxtrsClsCd" javaType="FxtrsClsCdVO" autoMapping="true">
+				<id property="fxClsCd" column="FX_CLS_CD"/>
+			</association>
+		</association>
+	</resultMap>
+	
+	<select id="selectFxtrsUseDtl" resultMap="fxtrsUseDtlMap" parameterType="String">
+		SELECT 
+		    FX_CLS_NM
+		    , FX_CD
+		    , FX_NM
+		    , FXUD_CNT
+		FROM 
+			TB_FXTRS_USE_DETAILS
+			INNER JOIN TB_FXTRS USING (FX_CD)
+			INNER JOIN TB_FXTRS_CLS_CD USING (FX_CLS_CD)
+		WHERE 
+		    FXUSE_NO = #{fxuseNo}
+	</select>
+</mapper>

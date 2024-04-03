@@ -1,0 +1,145 @@
+@charset "UTF-8";
+
+.inner {
+    position: relative;
+    margin: 0 auto;
+    padding-bottom: 180px;
+}
+
+.room-img {
+	width: 70%;
+	margin-left: 120px
+}
+
+.ban-img {
+	width: 1000px;
+	height: 150px;
+}
+.rom-img{
+	width: 640px;
+	height: 365px;
+	margin: 0 auto;
+}
+.d-flex {
+	display: flex;
+}
+
+.mg-right {
+	margin-right: 100px
+}
+
+.tabType01 li a {
+	display: block;
+	height: 70px;
+	line-height: 70px;
+	color: #666;
+	text-align: center;
+	font-size: 20px;
+	font-family: gothamL, notokrL;
+	letter-spacing: -1px;
+	text-transform: uppercase;
+}
+
+ul, ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+dl {
+	display: block;
+	margin-block-start: 1px;
+	margin-block-end: 1px;
+	margin-inline-start: 0px;
+	margin-inline-end: 0px;
+}
+
+.li-box {
+	display: inline-block;
+	border: 1px solid #ccc;
+	padding: 0px;
+	width: 200px;
+	height: 70px;
+	text-align: center;
+}
+
+.tabType01 {
+	position: relative;
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+	margin-left: 160px;
+}
+.roomType{
+	font-size: 30px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #ccc;
+}
+.roomType-e{
+	padding-bottom: 7px;
+	color: #A6A6A6;
+}
+.content{
+	font-size: 18px;
+	
+}
+.container{
+	max-width: 1320px;
+	}
+.room-table{
+	max-width: 608px;
+}
+
+.tr-pad{
+	padding-top: 30px;
+}
+th{
+	padding-right: 10px;
+	width: 120px;
+}
+td{
+	padding-right: 20px;
+	text-align: left;
+	width: 200px;
+}
+.cost{
+	font-size: 25px;
+}
+
+.co-mid{
+	vertical-align: middle;
+	padding-top: 40px;
+}
+.bak{
+	font-size: 20px;
+	padding-top: 40px;
+}
+.tel-box{
+	width: 170px;
+	height: 65px;
+    padding: 20px;
+    border: none;
+	background-color: #f9f9f9;
+	margin: 5px;
+}
+.hot-box{
+	width:530px;
+	background-color: #f9f9f9;
+	padding: 20px;
+	border: 1px;
+	margin: 5px;
+}
+.wid-740{
+	width: 530px !important;
+	height: 65px !important;
+	margin: 3px;
+}
+.ml{
+	margin-left: 365px;
+}
+/* input box color */
+input:-webkit-autofill { -webkit-box-shadow: 0 0 0 30px #f9f9f9 inset ; -webkit-text-fill-color: #000; }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { transition: background-color 5000s ease-in-out 0s; }
+
+
+

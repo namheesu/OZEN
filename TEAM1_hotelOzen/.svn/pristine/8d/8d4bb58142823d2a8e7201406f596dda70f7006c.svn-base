@@ -1,0 +1,70 @@
+@charset "UTF-8";
+
+.page{
+  display: block;
+  color: var(--falcon-btn-falcon-default-color);
+  background-color: var(--falcon-btn-falcon-background);
+  border-color: var(--falcon-btn-falcon-background);
+  -webkit-box-shadow: var(--falcon-btn-falcon-box-shadow);
+  box-shadow: var(--falcon-btn-falcon-box-shadow);
+  
+  --falcon-btn-border-width: var(--falcon-border-width);
+    
+  margin-right: 0.25rem;
+  margin-left: 0.25rem;
+  
+  height: 28px;
+  width: 30px;
+  border-radius: 3px;
+  font-size: 15px;
+  
+  text-align: center;
+  vertical-align: middle;
+  line-height: 28px;
+}
+
+.active{
+	color: #2c7be5;
+}
+
+.pagination{
+  --falcon-pagination-padding-x: 0.75rem;
+  --falcon-pagination-padding-y: 0.5rem;
+  --falcon-pagination-font-size: 1rem;
+  --falcon-pagination-color: var(--falcon-emphasis-color);
+  --falcon-pagination-bg: var(--falcon-quaternary-bg);
+  --falcon-pagination-border-width: var(--falcon-border-width);
+  --falcon-pagination-border-color: var(--falcon-gray-200);
+  --falcon-pagination-border-radius: var(--falcon-border-radius);
+  --falcon-pagination-hover-color: #fff;
+  --falcon-pagination-hover-bg: #2c7be5;
+  --falcon-pagination-hover-border-color: #2c7be5;
+  --falcon-pagination-focus-color: var(--falcon-gray-700);
+  --falcon-pagination-focus-bg: var(--falcon-gray-100);
+  --falcon-pagination-focus-box-shadow: none;
+  --falcon-pagination-active-color: #fff;
+  --falcon-pagination-active-bg: #2c7be5;
+  --falcon-pagination-active-border-color: #2c7be5;
+  --falcon-pagination-disabled-color: var(--falcon-gray-700);
+  --falcon-pagination-disabled-bg: var(--falcon-gray-100);
+  --falcon-pagination-disabled-border-color: var(--falcon-gray-200);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-right: 0;
+  list-style: none;
+}
+
+.pagination-lg {
+  --falcon-pagination-padding-x: 1.5rem;
+  --falcon-pagination-padding-y: 0.75rem;
+  --falcon-pagination-font-size: 1.2rem;
+  --falcon-pagination-border-radius: var(--falcon-border-radius-lg);
+}
+
+.pagination-sm {
+  --falcon-pagination-padding-x: 0.5rem;
+  --falcon-pagination-padding-y: 0.25rem;
+  --falcon-pagination-font-size: 0.875rem;
+  --falcon-pagination-border-radius: var(--falcon-border-radius-sm);
+}

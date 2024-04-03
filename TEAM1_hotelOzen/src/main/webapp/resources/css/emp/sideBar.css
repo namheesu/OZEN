@@ -1,0 +1,52 @@
+@charset "UTF-8";
+
+.profile{
+	margin-right:6px;
+}
+
+.profile > img {
+	margin:10px auto;
+	display:block;
+	width:100px;
+	height:100px;
+	overflow: hidden;
+	border: 5px solid #F6F5F5;
+}
+
+.rounded-circle-profile{
+	border-radius:100%
+}
+
+.profile-dept{
+	padding-bottom:10px;
+}
+
+.profile-button{
+	background-color: #FFFFFF;
+    border: 0;
+    padding-left: 25%;
+    color: black;
+}
+
+.profile-name-span{
+	font-size: 20px;
+	text-align: center;
+}
+
+.profile-dept-span{
+	font-size:10px;
+	text-align: center;
+}
+
+.profile-jbgd-span{
+	font-size:13px;
+	text-align: center;
+}
+
+.hm-li-marjin{
+    margin-bottom: 1px;
+}
+
+.navbar-vertical.navbar-card .navbar-nav .nav-item .nav-link.active{
+    font-weight: bold;
+}

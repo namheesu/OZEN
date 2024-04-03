@@ -1,0 +1,12 @@
+#log4jdbc \uc5d0 \ub9de\uac8c \ubcc0\uacbd
+driverClassName=ENC(dHVYgdmprmjRuoWdEozF3JcPlUZOkSyXZgF2kHpnZJ4T5CP5xhYxioXtNwCKru0e)
+url=ENC(XWdT+R/P6N5ZhfWNmfvrTrHxQTfQFlrBoMKC+wYRcGR5pKrer6oihBKvZQsP4YA//KaqokpQtVXpgJ3MlFMb6Q==)
+user=ENC(rdFahDfW3B7pLUaSAu6CBJqjx3pXx3B5)
+password=ENC(/dfo4f8/rVaUnGdrE943EA==)
+
+#connection pooling policy
+initialSize=2
+maxIdle=2
+maxTotal=3
+maxWait=2000
+

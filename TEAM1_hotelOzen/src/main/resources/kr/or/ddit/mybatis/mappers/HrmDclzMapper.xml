@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.HrmDclzMapper">
+
+
+<insert id="insert" parameterType="HrmDclzVO">
+	<selectKey resultType="string" keyProperty="dclzNo" order="BEFORE">
+		SELECT 
+		    NVL2(MAX(DCLZ_NO), 'D'|| TO_CHAR(SYSDATE,'YYMMDD')||LPAD(MAX(SUBSTR(DCLZ_NO,-4))+1, 4, 0), 'D'||TO_CHAR(SYSDATE,'YYMMDD')||'0001') AS DCLZ_NO
+		FROM TB_DCLZ
+		WHERE DCLZ_YMD = TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'),'YYYY-MM-DD') AND ROWNUM = 1
+		ORDER BY DCLZ_NO DESC
+	</selectKey>
+	INSERT INTO TB_DCLZ (
+		DCLZ_NO
+		, EMP_NO
+		, WORK_TYPE_CD
+		, DCLZ_YMD
+		, DCLZ_BGN_DT
+		, DCLZ_STTS
+	) VALUES (
+	     #{dclzNo,jdbcType=VARCHAR}
+		, #{empNo,jdbcType=VARCHAR}
+		, (SELECT NVL(WORK_TYPE,'G')
+			FROM TB_WORK_SCHDL A RIGHT OUTER JOIN DUAL
+			ON (A.EMP_NO =#{empNo,jdbcType=VARCHAR} AND A.WORK_DATE = SYSDATE))
+		, SYSDATE
+		, SYSTIMESTAMP
+		, 'O'
+	)
+</insert>
+
+<update id="updateGetOffWork" parameterType="string">
+</update>
+
+<select id="select" parameterType="string">
+	SELECT *
+	FROM TB_DCLZ
+	WHERE EMP_NO = #{empNo,jdbcType=VARCHAR}
+	AND TO_CHAR(DCLZ_YMD, 'YYYY-MM-DD')= TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+
+</select>
+
+</mapper>

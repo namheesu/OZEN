@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+caption {
+	overflow : hidden;
+}
+.table th,
+.table td {
+	padding: 20px; /* 테이블 셀의 안쪽 여백 조절 */
+	font-size: 20px; /* 테이블 글꼴 크기 조절 */
+	border : none;
+	border-top : 1px solid rgba(0,0,0,.15);
+	color : #000000;
+}
+.notice-list_number {
+	width : 140rem;
+}
+.notice-list_title {
+	width : auto;
+}
+.notice-list_file
+.notice-list_cnt {
+	width : 80rem;
+}
+.notice-list_date {
+	width : 132rem;
+	text-align : left;
+}
+a:hover {
+    text-decoration: none;
+}

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.MbrshSetleMapper">
+
+	<select id="selectMbsNo" resultType="string">
+		SELECT
+	    CASE
+	        WHEN COUNT(*) > 0 THEN 'MBS' ||
+	            TO_CHAR(SYSDATE, 'YYMM')||
+	            LPAD(MAX(SUBSTR((MBS_NO), -3, 4)) +1, 4, '0')
+	        ELSE
+	            'MBS' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
+	    END
+		FROM TB_MBRSH_SETLE
+		WHERE 
+		    SUBSTR(MBS_NO ,4,4) LIKE TO_CHAR(SYSDATE, 'YYMM')
+	</select>
+	
+	<select id="selectMbsSetleNo" resultType="string">
+		SELECT
+		    CASE
+		    WHEN COUNT(*) > 0 THEN 'CPMB' ||
+		        TO_CHAR(SYSDATE, 'YYMM')||
+		        LPAD(MAX(SUBSTR((SETLE_NO), -2, 4)) +1, 4, '0')
+		    ELSE
+		        'CPMB' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
+		    END
+		FROM TB_SETLE
+		WHERE
+		    SUBSTR(SETLE_NO, 5,4) LIKE TO_CHAR(SYSDATE, 'YYMM')
+		    AND SUBSTR(SETLE_NO, 1, 4) LIKE 'CPMB'
+	</select>
+	
+	<insert id="insertToMbsSetle" parameterType="MbrshSetleVO">
+		INSERT INTO TB_MBRSH_SETLE (
+		    MBS_SETLE_NO
+		    , MBS_NO
+		    , MBS_SBSCRB_YMD
+		    , MBS_EXPRT_YMD
+		    , MBS_SETLE_AMNT
+		    , CST_NO
+		    , MBS_GRD_CD
+		) VALUES (
+		    #{mbsSetleNo}
+		  , #{mbsNo}
+		  , SYSDATE
+		  , SYSDATE + 365
+		  , #{mbsSetleAmnt}
+		  , #{cstNo}
+		  , #{mbsGrdCd}
+		)
+	</insert>
+	
+	<insert id="insertToSetle" parameterType="SetleVO">
+		INSERT INTO TB_SETLE (
+		    SETLE_NO
+		    , CST_NO
+		    , SETLE_YMD
+		    , SETLE_AMNT
+		    , SETLE_STTUS_CD
+		    , SETLE_CARD_NM
+		    , SETLE_CARD_NUMBER
+		    , SETLE_IMP_UID
+		    , SETLE_MERCHANT_UID
+		    , SETLE_PAY_METHOD
+		    , SETLE_ADD
+		) VALUES (
+		    #{setleNo}
+		  , #{cstNo}
+		  , SYSDATE
+		  , #{setleAmnt}
+		  , 'Y'
+		  , #{setleCardNm}
+		  , #{setleCardNumber}
+		  , #{setleImpUid}
+		  , #{setleMerchantUid}
+		  , #{setlePayMethod}
+		  , 'CPMB'
+		)
+	</insert>
+	
+	<insert id="insertMileage">
+		INSERT INTO TB_MILEAGE (
+		    CST_NO
+		    , MLG_YMD
+		    , MLG_AMNT
+		    , MLG_USE_CD
+		    , MLG_SORT
+		) VALUES (
+		    #{cstNo}
+		  , SYSDATE
+		  , #{mileage}
+		  , 'ADD'
+		  , '멤버십 가입'
+		)
+	</insert>
+	
+	<insert id="insertCoupon" parameterType="list">
+		INSERT ALL
+		<foreach collection="list" item="coupon">
+		INTO TB_COUPON_ISN (
+		    CPN_NO
+		    , CST_NO
+		    , CPNK_NO
+		    , CPN_ISSU_YMD
+		    , CPN_EXPRT_YMD
+		    , CPN_AVAIL_YN
+		) 
+		VALUES 
+		(
+			#{coupon.cpnNo}
+			, #{coupon.cstNo}
+			, #{coupon.cpnkNo}
+			, SYSDATE
+			, SYSDATE + 365
+			, 'Y'
+		)	
+		</foreach>
+		SELECT * 
+		FROM DUAL
+	</insert>
+</mapper>
